@@ -153,8 +153,8 @@ the session and the `fauxtography` CLI picks it up automatically. Use
 **GPU**, not TPU — only the baseline truly trains, and a T4 is enough for all
 three models at project scale.
 
-**Quickest path:** open `notebooks/setup_colab.ipynb` and run cells top to
-bottom. It does everything below for you.
+**Quickest path:** open `notebooks/fauxtography-on-colab.ipynb` and run cells
+top to bottom. It does everything below for you in one go.
 
 ### Manually, cell by cell
 

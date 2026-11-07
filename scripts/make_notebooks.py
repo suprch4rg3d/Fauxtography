@@ -272,13 +272,17 @@ print("TODO: joint conclusions")
 
 
 # --------------------------------------------------------------------------- #
-# setup_colab.ipynb  —  run this FIRST in a Colab session
+# fauxtography-on-colab.ipynb — run this FIRST in a Colab session; it does
+# everything in one go (env, Drive, data split, training).
 # --------------------------------------------------------------------------- #
-def setup_colab() -> list[dict]:
+def fauxtography_on_colab() -> list[dict]:
     return [
         md(
             """\
-# Setup — Run me first (in Google Colab, GPU runtime)
+# Fauxtography on Colab — run everything in one go
+
+Run this first in a **Google Colab GPU** runtime. This notebook does the
+whole pipeline: environment, Drive, data split and the model training steps.
 
 This notebook prepares a Colab session to run the fauxtography pipeline on a
 GPU. It is *not* the analysis (those live in the other notebooks); it:
@@ -454,7 +458,7 @@ def main() -> None:
     write("analysis_dinov2.ipynb",
           model_analysis("dinov2", "DINOv2 + linear probe", "Collaborator B"))
     write("final_report.ipynb", final_report())
-    write("setup_colab.ipynb", setup_colab())
+    write("fauxtography-on-colab.ipynb", fauxtography_on_colab())
 
 
 if __name__ == "__main__":

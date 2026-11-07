@@ -6,7 +6,7 @@ error inspection, and write the verdicts that go on the presentation slides.
 
 | Notebook | Purpose | Owner |
 |----------|---------|-------|
-| `setup_colab.ipynb` | **run first** in Colab: env, Drive, data split, training | shared |
+| `fauxtography-on-colab.ipynb` | **run first** in Colab: env, Drive, data split, training — everything in one notebook | shared |
 | `00_data_overview.ipynb` | confirm splits + class balance, sample grid | shared |
 | `analysis_clip.ipynb` | CLIP metrics, confusion matrix, error inspection, verdict | Collaborator A |
 | `analysis_dinov2.ipynb` | DINOv2 probe metrics, errors, verdict | Collaborator B |
@@ -14,7 +14,8 @@ error inspection, and write the verdicts that go on the presentation slides.
 
 ## Running in Colab (with a GPU)
 
-1. **Open `setup_colab.ipynb` first** and run its cells top-to-bottom: it
+1. **Open `fauxtography-on-colab.ipynb` first** and run its cells
+   top-to-bottom: it
    installs a Python 3.14 env with `uv`, installs the package, verifies the
    accelerator with `fauxtography env`, splits the dataset, and runs the model
    commands. Outputs go to your Drive via `FAUXTOGRAPHY_*` env vars, so they

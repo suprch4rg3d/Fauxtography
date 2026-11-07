@@ -60,7 +60,7 @@ scripts/                notebook generator (make_notebooks.py)
 **Analysis (the story)** — what you read and present:
 
 ```
-notebooks/              setup_colab · 00_data_overview · analysis_clip ·
+notebooks/              fauxtography-on-colab · 00_data_overview · analysis_clip ·
                         analysis_dinov2 · final_report
 results/                committed metrics + figures (read by the notebooks)
 docs/                   plan, work division, setup, per-model write-ups
@@ -123,10 +123,10 @@ poetry run fauxtography prepare-data --source-real <real> --source-fake <fake>
 
 # Colab: real training happens here, on a GPU
 ```
-1. Open **`notebooks/setup_colab.ipynb`** in a **GPU** runtime and run it
-   top-to-bottom: it installs the Python 3.14 env with `uv`, installs the
-   package, verifies the accelerator (`fauxtography env`), splits the data,
-   and runs the model commands. Data + outputs go to your **Drive** via
+1. Open **`notebooks/fauxtography-on-colab.ipynb`** in a **GPU** runtime and
+   run it top-to-bottom: one notebook handles everything — it installs the
+   Python 3.14 env with `uv`, installs the package, verifies the accelerator
+   (`fauxtography env`), splits the data, and runs the model commands. Data + outputs go to your **Drive** via
    `FAUXTOGRAPHY_DATA_ROOT` / `RUN_DIR` / `RESULTS_DIR`, so they survive
    session disconnects (see [`docs/setup.md`](docs/setup.md) — Colab section).
 2. Open `00_data_overview.ipynb`, then `analysis_clip.ipynb` /
