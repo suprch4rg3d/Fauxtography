@@ -1,0 +1,12 @@
+# Runtime dependencies for fauxtography (verified on macOS/arm64, Python 3.15,
+# torch 2.15). Pinned exactly for reproducibility across teammates.
+torch==2.15.0
+torchvision==0.29.2
+transformers==5.22.2
+numpy==2.5.4
+pillow==13.0.0
+PyYAML==6.0.3
+scikit-learn==1.9.1
+matplotlib==3.11.2
+pandas==3.1.1
+tqdm==4.70.1
