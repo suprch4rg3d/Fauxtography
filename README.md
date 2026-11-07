@@ -49,7 +49,7 @@ filled in per owner as the milestones land.
 poetry install --all-extras
 
 # --- or plain pip ---
-python3.15 -m venv .venv
+python3.14 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements-dev.txt
 pip install -e .
@@ -75,7 +75,7 @@ Runs are reproducible via `seed` in each config. See
 ## Hardware
 
 Scripts auto-detect CUDA → MPS (Apple Silicon) → CPU. Verified working on an
-Apple M4 (Python 3.15, torch 2.15).
+Apple M4 (Python 3.14, torch 2.15).
 
 ## Git workflow
 

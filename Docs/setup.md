@@ -4,8 +4,8 @@ This project can be installed two ways — with **Poetry** or with **plain pip**
 (via `requirements.txt`). Use whichever you're comfortable with; both produce
 the same runtime environment. Pick one per machine and stick to it.
 
-**Prerequisite:** Python **3.15** (3.15 is required; the dependency set is
-verified against macOS/arm64 + Python 3.15 + torch 2.15).
+**Prerequisite:** Python **3.14** (3.14 is required; the dependency set is
+verified against macOS/arm64 + Python 3.14 + torch 2.15).
 
 ---
 
@@ -86,7 +86,7 @@ requirements files with the standard `venv` + `pip` flow. Works on any setup.
 
 ```bash
 cd fauxtography
-python3.15 -m venv .venv
+python3.14 -m venv .venv
 source .venv/bin/activate        # macOS/Linux
 # Windows: .venv\Scripts\activate
 ```
@@ -148,8 +148,8 @@ from `poetry.lock`.)
 
 - **``ModuleNotFoundError: fauxtography``** — the package isn't installed
   editable. Run `pip install -e .` (pip) or `poetry install` (Poetry).
-- **Wrong Python version** — the project needs 3.15. Check `python3.15 --version`;
-  if 3.15 isn't on your PATH, install it (e.g. `brew install python@3.15`).
+- **Wrong Python version** — the project needs 3.14. Check `python3.14 --version`;
+  if 3.14 isn't on your PATH, install it (e.g. `brew install python@3.14`).
 - **`pytest` not found** — dev extras were skipped. Use `--all-extras`
   (Poetry) or `requirements-dev.txt` (pip).
 - **Ideas for GPU vs CPU** — torch 2.15 wheels are the same across CUDA/CPU
