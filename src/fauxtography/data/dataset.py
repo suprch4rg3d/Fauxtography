@@ -1,6 +1,6 @@
 """Dataset handling (shared infra).
 
-Standard class-folder layout created by scripts/prepare_data.py:
+Standard class-folder layout created by `fauxtography prepare-data`:
 
     data/
       train/real/*  train/fake/*
@@ -17,7 +17,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import torch
 from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
 
@@ -59,17 +58,6 @@ def get_datasets(data_cfg, train_transform, eval_transform, *, use_validation: b
     if missing:
         raise FileNotFoundError(
             f"Data root {root} is missing split(s) {sorted(missing)}. "
-            "Run `python scripts/prepare_data.py --help` first."
+            "Run `fauxtography prepare-data --help` first."
         )
     return splits
-
-
-def make_loader(dataset: Dataset, batch_size: int, shuffle: bool, num_workers: int):
-    """Shared DataLoader factory so every script builds loaders identically."""
-    return torch.utils.data.DataLoader(
-        dataset,
-        batch_size=batch_size,
-        shuffle=shuffle,
-        num_workers=num_workers,
-        pin_memory=torch.cuda.is_available(),
-    )

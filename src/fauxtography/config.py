@@ -8,7 +8,7 @@ and get a fully-populated typed object.
 from __future__ import annotations
 
 import os
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, get_type_hints
 
@@ -160,11 +160,3 @@ def _apply_path_overrides(cfg: Any) -> Any:
             continue
         setattr(outer_obj, inner, val)
     return cfg
-
-
-# --------------------------------------------------------------------------- #
-# Misc helpers
-# --------------------------------------------------------------------------- #
-def config_to_dict(cfg: Any) -> dict[str, Any]:
-    """Convert a config object to a plain dict for reporting/JSON."""
-    return asdict(cfg)

@@ -54,7 +54,7 @@ src/fauxtography/       the whole pipeline in one package
   └── utils/            device.py (cuda→mps→cpu) · seed.py · logging.py
 configs/                baseline.yaml · clip.yaml · dinov2.yaml
 tests/                  smoke tests for the shared infrastructure
-scripts/                thin CLI wrappers + notebook generator (see note below)
+scripts/                notebook generator (make_notebooks.py)
 ```
 
 **Analysis (the story)** — what you read and present:
@@ -149,8 +149,6 @@ and the stub contracts already define their inputs/outputs (labels
 `0=real, 1=fake`) so each half drops in without touching the other's code.
 
 Notes:
-- `scripts/*.py` are thin wrappers that just forward to the CLI — they exist
-  for backward compatibility and are candidates for removal.
 - `notebooks/` are generated from templates via `scripts/make_notebooks.py`;
   edit templates and re-run, don't hand-edit the JSON.
 

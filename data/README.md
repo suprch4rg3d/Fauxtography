@@ -1,10 +1,11 @@
 # Data
 
 This directory is **git-ignored**; raw images and prepared splits live only on
-your machines (or a shared drive). `prepare_data.py` rebuilds the split layout
-from raw folders, so teammates clone the repo and re-run preparation.
+your machines (or a shared drive). `fauxtography prepare-data` rebuilds the
+split layout from raw folders, so teammates clone the repo and re-run
+preparation.
 
-Expected layout after `python scripts/prepare_data.py`:
+Expected layout after `fauxtography prepare-data --source-real ... --source-fake ...`:
 
 ```
 data/

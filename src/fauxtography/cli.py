@@ -19,9 +19,8 @@ Path override env vars (set once, redirects every command):
 (see fauxtography.config).
 
 
-The loose scripts under ``scripts/`` are thin wrappers that call
-``main(["<subcommand>", *argv])`` to keep the old ``python scripts/x.py``
-invocation working.
+This is the only entry point — the old per-step ``scripts/*.py`` header
+remainders have been folded into it.
 """
 
 from __future__ import annotations
@@ -183,7 +182,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Entry point for the ``fauxtography`` console script (and scripts/*)."""
+    """Entry point for the ``fauxtography`` console script."""
     args = build_parser().parse_args(argv)
     return args.func(args)
 

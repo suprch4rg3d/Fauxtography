@@ -44,7 +44,8 @@ Each collaborator:
 
 ## Milestones (proposed)
 
-1. **M0 — data**: acquire dataset, run `prepare_data.py`, commit split counts.
+1. **M0 — data**: acquire dataset, run `fauxtography prepare-data`, commit
+   split counts.
 2. **M1 — baseline**: ResNet fine-tune, report loss/acc curves (shared).
 3. **M2/M3 — models in parallel** (each owner): CLIP zero-shot, DINOv2 probe.
 4. **M4 — analysis**: per-owner error inspection docs.
