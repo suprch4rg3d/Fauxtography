@@ -16,7 +16,7 @@ class LinearProbe(nn.Module):
 
     def __init__(self, in_features: int, num_classes: int = 2) -> None:
         """TODO(impl): single `nn.Linear(in_features, num_classes)` head."""
-        raise NotImplementedError("Implement in the DINOv2 milestone (see Docs).")
+        raise NotImplementedError("Implement in the DINOv2 milestone (see docs).")
 
     def forward(self, features: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError("Implement in the DINOv2 milestone (see Docs).")
+        raise NotImplementedError("Implement in the DINOv2 milestone (see docs).")

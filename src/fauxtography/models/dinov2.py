@@ -16,9 +16,9 @@ class DINOv2FeatureExtractor:
 
     def __init__(self, arch: str = "dinov2_vitb14", device: torch.device | str = "auto") -> None:
         """TODO(impl): load torchvision DINOv2 backbone, keep frozen, eval mode."""
-        raise NotImplementedError("Implement in the DINOv2 milestone (see Docs).")
+        raise NotImplementedError("Implement in the DINOv2 milestone (see docs).")
 
     @torch.no_grad()
     def extract(self, images: torch.Tensor) -> torch.Tensor:
         """images (B,3,H,W) ImageNet-normalized -> (B, embed_dim) features."""
-        raise NotImplementedError("Implement in the DINOv2 milestone (see Docs).")
+        raise NotImplementedError("Implement in the DINOv2 milestone (see docs).")

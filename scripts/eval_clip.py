@@ -23,7 +23,7 @@ def main() -> None:
 
     cfg = load_config("clip", args.config)
     logger.info("TODO: implement CLIP zero-shot evaluation (config=%s)", args.config)
-    raise NotImplementedError("CLIP milestone — see Docs/milestones.")
+    raise NotImplementedError("CLIP milestone — see docs/milestones.")
 
 
 if __name__ == "__main__":

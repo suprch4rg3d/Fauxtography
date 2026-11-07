@@ -20,4 +20,4 @@ def build_baseline_model(
     device: torch.device | str = "auto",
 ) -> nn.Module:
     """TODO(impl): torchvision ResNet with a fresh binary classification head."""
-    raise NotImplementedError("Implement in the baseline milestone (see Docs).")
+    raise NotImplementedError("Implement in the baseline milestone (see docs).")

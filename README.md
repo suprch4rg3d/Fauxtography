@@ -12,20 +12,18 @@ comparing three approaches on a shared test set:
 | 3 | DINOv2 + linear probe | foundation (self-supervised vision) | linear head only |
 
 *MAI644 Semester Group Project — Computer Vision* — key deliverables:
-[`Docs/technical_plan.md`](Docs/technical_plan.md), team split in
-[`Docs/work_division.md`](Docs/work_division.md), setup in
-[`Docs/setup.md`](Docs/setup.md).
-team split in [`Docs/work_division.md`](Docs/work_division.md),
-setup in [`Docs/setup.md`](Docs/setup.md).
+[`docs/technical_plan.md`](docs/technical_plan.md), team split in
+[`docs/work_division.md`](docs/work_division.md), setup in
+[`docs/setup.md`](docs/setup.md).
 
-**Install:** use either [Poetry](Docs/setup.md#option-a--poetry-preferred-by-the-repo-author) or
-[pip + requirements.txt](Docs/setup.md#option-b--plain-pip-requirementstxt) —
-see [`Docs/setup.md`](Docs/setup.md) for full instructions.
+**Install:** use either [Poetry](docs/setup.md#option-a--poetry-preferred-by-the-repo-author) or
+[pip + requirements.txt](docs/setup.md#option-b--plain-pip-requirementstxt) —
+see [`docs/setup.md`](docs/setup.md) for full instructions.
 
 ## Repo layout
 
 ```
-Docs/                     plan + work division + per-model analysis write-ups
+docs/                     plan + work division + per-model analysis write-ups
 src/fauxtography/         package (data, models, evaluate, utils, config)
 scripts/                  runnable pipeline entry points
 configs/                  per-model YAML configs
@@ -70,7 +68,7 @@ pytest
 
 Each script reads `configs/<model>.yaml` (override with `--config <path>`).
 Runs are reproducible via `seed` in each config. See
-[`Docs/setup.md`](Docs/setup.md) for detailed setup and troubleshooting.
+[`docs/setup.md`](docs/setup.md) for detailed setup and troubleshooting.
 
 ## Hardware
 

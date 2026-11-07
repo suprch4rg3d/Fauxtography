@@ -23,7 +23,7 @@ def main() -> None:
 
     cfg = load_config("dinov2", args.config)
     logger.info("TODO: implement linear probe training (config=%s)", args.config)
-    raise NotImplementedError("DINOv2 milestone — see Docs/milestones.")
+    raise NotImplementedError("DINOv2 milestone — see docs/milestones.")
 
 
 if __name__ == "__main__":

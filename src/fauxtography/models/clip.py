@@ -17,9 +17,9 @@ class CLIPZeroShot:
 
     def __init__(self, config, device: torch.device | str = "auto") -> None:
         """TODO(impl): load CLIP (HF transformers) and build prompt templates."""
-        raise NotImplementedError("Implement in the CLIP milestone (see Docs).")
+        raise NotImplementedError("Implement in the CLIP milestone (see docs).")
 
     @torch.no_grad()
     def predict(self, images: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         """images (B,C,H,W) -> (preds, probs) with labels 0=real, 1=fake."""
-        raise NotImplementedError("Implement in the CLIP milestone (see Docs).")
+        raise NotImplementedError("Implement in the CLIP milestone (see docs).")

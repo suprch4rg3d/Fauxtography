@@ -23,7 +23,7 @@ def main() -> None:
 
     cfg = load_config("baseline", args.config)
     logger.info("TODO: implement baseline training (config=%s)", args.config)
-    raise NotImplementedError("Baseline training — see Docs/milestones.")
+    raise NotImplementedError("Baseline training — see docs/milestones.")
 
 
 if __name__ == "__main__":

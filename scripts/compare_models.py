@@ -22,7 +22,7 @@ def main() -> None:
     parser.add_argument("--results-dir", default="results", type=Path)
     args = parser.parse_args()
     logger.info("TODO: implement model comparison (results-dir=%s)", args.results_dir)
-    raise NotImplementedError("Joint comparison — see Docs/milestones.")
+    raise NotImplementedError("Joint comparison — see docs/milestones.")
 
 
 if __name__ == "__main__":
