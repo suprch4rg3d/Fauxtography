@@ -15,9 +15,11 @@ data/
 ```
 
 ## Choosing the dataset
-Document here where real photographs and AI-generated images come from, e.g.:
+We use **GenImage** (see `docs/dataset_research.md`):
 
-- **Real:** ... (dataset name + count + license)
-- **AI-generated:** ... (generator/model used + count)
+- **Real (nature):** ImageNet images.
+- **AI-generated:** Stable Diffusion v1.4 subset for training, with other
+  generators (Midjourney, ADM, BigGAN) held out for cross-generator analysis.
 
-Keep versioned counts up to date so results stay comparable between teammates.
+Update the counts below when the subsets are final so results stay comparable
+between teammates.

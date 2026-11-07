@@ -12,7 +12,8 @@ by comparing three approaches on a shared test set:
 | 3 | DINOv2 + linear probe | foundation (self-supervised vision) | linear head only |
 
 **Read first:** the plan in [`docs/technical_plan.md`](docs/technical_plan.md)
-(method + analysis strategy), the team split in
+(method + analysis strategy), the dataset choice in
+[`docs/dataset_research.md`](docs/dataset_research.md), the team split in
 [`docs/work_division.md`](docs/work_division.md), and
 [`docs/setup.md`](docs/setup.md) (install + Colab).
 
@@ -57,7 +58,7 @@ tests/                  smoke tests for the shared infrastructure
 scripts/                notebook generator (make_notebooks.py)
 ```
 
-**Analysis (the story)** - what you read and present:
+**Analysis (results & verdicts)** - the presentation layer:
 
 ```
 notebooks/              fauxtography-on-colab · 00_data_overview · analysis_clip ·
