@@ -9,6 +9,15 @@ console script:
     poetry run fauxtography extract-dinov2
     poetry run fauxtography train-linear-probe
     poetry run fauxtography compare
+    poetry run fauxtography env
+
+Use ``fauxtography env`` first in a Colab session to confirm the GPU/accelerator
+is available before running any training command.
+
+Path override env vars (set once, redirects every command):
+    FAUXTOGRAPHY_DATA_ROOT, FAUXTOGRAPHY_RUN_DIR, FAUXTOGRAPHY_RESULTS_DIR
+(see fauxtography.config).
+
 
 The loose scripts under ``scripts/`` are thin wrappers that call
 ``main(["<subcommand>", *argv])`` to keep the old ``python scripts/x.py``
@@ -116,6 +125,19 @@ def cmd_compare(args: argparse.Namespace) -> int:
     raise NotImplementedError("Joint comparison — see docs/milestones.")
 
 
+def cmd_env(args: argparse.Namespace) -> int:
+    """Print the runtime/environment report (tensor stack + accelerator).
+
+    The first thing to run in a Colab session — confirms whether a GPU is
+    actually attached before spending time on training.
+    """
+    from .utils.device import device_report
+
+    for key, value in device_report().items():
+        print(f"{key:>16}: {value}")
+    return 0
+
+
 # --------------------------------------------------------------------------- #
 # Parser + dispatch
 # --------------------------------------------------------------------------- #
@@ -153,6 +175,9 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("compare", help="aggregate per-model metrics")
     p.add_argument("--results-dir", default="results", type=Path)
     p.set_defaults(func=cmd_compare)
+
+    p = sub.add_parser("env", help="print environment / accelerator report")
+    p.set_defaults(func=cmd_env)
 
     return parser
 

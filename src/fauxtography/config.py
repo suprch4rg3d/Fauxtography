@@ -7,6 +7,7 @@ and get a fully-populated typed object.
 
 from __future__ import annotations
 
+import os
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, get_type_hints
@@ -109,7 +110,7 @@ def load_config(name: str, path: str | Path | None = None) -> Any:
         with open(path) as fh:
             raw = yaml.safe_load(fh) or {}
 
-    return _build(cfg_type, raw)
+    return _apply_path_overrides(_build(cfg_type, raw))
 
 
 def _build(cfg_type: type, raw: dict[str, Any]) -> Any:
@@ -130,6 +131,35 @@ def _build(cfg_type: type, raw: dict[str, Any]) -> Any:
         else:
             kwargs[fname] = val
     return cfg_type(**kwargs)
+
+
+# --------------------------------------------------------------------------- #
+# Environment overrides
+# --------------------------------------------------------------------------- #
+# In Colab / CI, data and outputs often live somewhere other than the repo
+# working dir (a Drive mount, /content/, ...). These env vars override the
+# matching config fields without editing any YAML, so one exported variable
+# redirects every command:
+#   FAUXTOGRAPHY_DATA_ROOT      -> cfg.data.root
+#   FAUXTOGRAPHY_RUN_DIR        -> cfg.output.run_dir        (checkpoints/feats)
+#   FAUXTOGRAPHY_RESULTS_DIR    -> cfg.output.results_dir    (committed metrics)
+_PATH_OVERRIDES = {
+    "FAUXTOGRAPHY_DATA_ROOT": ("data", "root"),
+    "FAUXTOGRAPHY_RUN_DIR": ("output", "run_dir"),
+    "FAUXTOGRAPHY_RESULTS_DIR": ("output", "results_dir"),
+}
+
+
+def _apply_path_overrides(cfg: Any) -> Any:
+    for env_var, (outer, inner) in _PATH_OVERRIDES.items():
+        val = os.environ.get(env_var)
+        if not val:
+            continue
+        outer_obj = getattr(cfg, outer, None)
+        if outer_obj is None:
+            continue
+        setattr(outer_obj, inner, val)
+    return cfg
 
 
 # --------------------------------------------------------------------------- #

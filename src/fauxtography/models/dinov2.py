@@ -15,7 +15,9 @@ class DINOv2FeatureExtractor:
     """[CLS]-token feature extractor backed by a DINOv2 vision backbone."""
 
     def __init__(self, arch: str = "dinov2_vitb14", device: torch.device | str = "auto") -> None:
-        """TODO(impl): load torchvision DINOv2 backbone, keep frozen, eval mode."""
+        """TODO(impl): resolve device via utils.device.get_device (auto ->
+        cuda -> mps -> cpu), then load a torchvision DINOv2 backbone, keep
+        it frozen in eval mode."""
         raise NotImplementedError("Implement in the DINOv2 milestone (see docs).")
 
     @torch.no_grad()

@@ -19,5 +19,6 @@ def build_baseline_model(
     num_classes: int = 2,
     device: torch.device | str = "auto",
 ) -> nn.Module:
-    """TODO(impl): torchvision ResNet with a fresh binary classification head."""
+    """TODO(impl): resolve device via utils.device.get_device (auto -> cuda
+    -> mps -> cpu), then build a torchvision ResNet with a fresh binary head."""
     raise NotImplementedError("Implement in the baseline milestone (see docs).")
