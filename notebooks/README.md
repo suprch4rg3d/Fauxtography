@@ -6,6 +6,7 @@ error inspection, and write the verdicts that go on the presentation slides.
 
 | Notebook | Purpose | Owner |
 |----------|---------|-------|
+| `setup_colab.ipynb` | **run first** in Colab: env, Drive, data split, training | shared |
 | `00_data_overview.ipynb` | confirm splits + class balance, sample grid | shared |
 | `analysis_clip.ipynb` | CLIP metrics, confusion matrix, error inspection, verdict | Collaborator A |
 | `analysis_dinov2.ipynb` | DINOv2 probe metrics, errors, verdict | Collaborator B |
@@ -13,20 +14,17 @@ error inspection, and write the verdicts that go on the presentation slides.
 
 ## Running in Colab (with a GPU)
 
-1. Mount this repo (clone or upload), then in a code cell:
-
-   ```python
-   # bootstrap Python 3.14 env with uv, then install the package
-   !pip install -q uv && uv venv --python 3.14 /content/fxt-venv
-   /content/fxt-venv/bin/pip install -e .
-   ```
-
-   (Or use `requirements-dev.txt`. See `docs/setup.md` for both paths.)
-
-2. Point `DATA_ROOT` in `00_data_overview.ipynb` at your dataset
-   (a Colab Drive mount or a folder you upload).
-3. Run the notebooks top-to-bottom. Each is self-contained and will print a
-   friendly placeholder until its `results/<model>/metrics.json` exists.
+1. **Open `setup_colab.ipynb` first** and run its cells top-to-bottom: it
+   installs a Python 3.14 env with `uv`, installs the package, verifies the
+   accelerator with `fauxtography env`, splits the dataset, and runs the model
+   commands. Outputs go to your Drive via `FAUXTOGRAPHY_*` env vars, so they
+   survive Colab session disconnects.
+2. Then open `00_data_overview.ipynb` and the per-model analysis notebooks.
+   Point `DATA_ROOT` / `results` at your Drive path if they don't already
+   match the env vars.
+3. Run the analysis notebooks top-to-bottom. Each is self-contained and will
+   print a friendly placeholder until its `results/<model>/metrics.json`
+   exists.
 
 ## Regenerating the skeletons
 

@@ -271,6 +271,182 @@ print("TODO: joint conclusions")
     ]
 
 
+# --------------------------------------------------------------------------- #
+# setup_colab.ipynb  —  run this FIRST in a Colab session
+# --------------------------------------------------------------------------- #
+def setup_colab() -> list[dict]:
+    return [
+        md(
+            """\
+# Setup — Run me first (in Google Colab, GPU runtime)
+
+This notebook prepares a Colab session to run the fauxtography pipeline on a
+GPU. It is *not* the analysis (those live in the other notebooks); it:
+
+1. clones the repo (or reuses an already-mounted Drive copy)
+2. creates a **Python 3.14** env with `uv` (Colab's own Python is 3.11/3.12,
+   which our deps pin away from — see `docs/setup.md`)
+3. installs the package
+4. verifies the accelerator with `fauxtography env`
+5. splits the dataset and runs the model commands (the GPU steps)
+6. copies `results/` + checkpoints to Drive so they survive session
+   disconnects
+
+Make sure you know where your dataset is BEFORE running (cell for that
+below). Run cells top-to-bottom, in order.
+"""
+        ),
+        md(
+            """\
+## 1. Environment + repo
+
+Colab runtimes persist nothing between sessions, so each session re-does this
+setup. Set ``REPO_URL`` if your fork has a different name. If you'd rather use
+a Drive copy, mount Drive (cell 2) and ``cd`` into it instead of cloning.
+"""
+        ),
+        code(
+            """\
+# Install uv (fast Python env manager that can fetch a 3.14 interpreter)
+!pip install -q uv
+
+repo = "/content/fauxtography"
+import os
+if not os.path.isdir(repo):
+    !git clone --depth 1 https://github.com/suprch4rg3d/fauxtography.git {repo}
+os.chdir(repo)
+print("repo ready at", os.getcwd())
+"""
+        ),
+        md(
+            """\
+## 2. Mount Google Drive (for dataset + persistent results)
+
+The dataset and the outputs you want to keep (results, checkpoints) should
+live on Drive, not on Colab's ephemeral disk.
+"""
+        ),
+        code(
+            """\
+from google.colab import drive
+drive.mount("/content/drive")
+print("Drive mounted at /content/drive")
+"""
+        ),
+        md(
+            """\
+## 3. Create the Python 3.14 env and install the package
+"""
+        ),
+        code(
+            """\
+venv = "/content/fxt-venv"
+!uv venv --python 3.14 {venv}
+!uv pip install --python {venv}/bin/python -e .
+print("package installed into", venv)
+"""
+        ),
+        md(
+            """\
+## 4. Verify the accelerator
+
+This is the moment to confirm a GPU is actually attached. You should see
+``cuda_available: True`` and a GPU name (e.g. Tesla T4). If you see ``cpu``,
+use Runtime > Change runtime type and pick a **GPU** accelerator, then rerun.
+"""
+        ),
+        code(
+            """\
+!/content/fxt-venv/bin/fauxtography env
+""",
+        ),
+        md(
+            """\
+## 5. Point everything at your data + Drive-backed outputs
+
+Set these once: every command reads them via the config env-var overrides
+(see `src/fauxtography/config.py`).
+"""
+        ),
+        code(
+            """\
+import os
+venv = "/content/fxt-venv"
+repo = "/content/fauxtography"
+os.chdir(repo)
+DATA_ROOT = "/content/drive/MyDrive/fauxtography/data"     # WHERE IS YOUR DATASET?
+RUN_DIR = "/content/drive/MyDrive/fauxtography/experiments"   # checkpoints / features
+RESULTS_DIR = "/content/drive/MyDrive/fauxtography/results"   # committed metrics
+
+# Export overrides — the CLI/package pick these up automatically.
+os.environ["FAUXTOGRAPHY_DATA_ROOT"] = DATA_ROOT
+os.environ["FAUXTOGRAPHY_RUN_DIR"] = RUN_DIR
+os.environ["FAUXTOGRAPHY_RESULTS_DIR"] = RESULTS_DIR
+print("configured:", DATA_ROOT)
+"""
+        ),
+        md(
+            """\
+## 6. Split the dataset (if not already prepared in Drive)
+
+Edit the two source paths below to match your raw image folders, then run.
+Safe to rerun; copies into ``data/`` under your Drive.
+"""
+        ),
+        code(
+            """\
+!/content/fxt-venv/bin/fauxtography prepare-data \\
+    --source-real /content/drive/MyDrive/fauxtography/data/_raw/real \\
+    --source-fake /content/drive/MyDrive/fauxtography/data/_raw/fake \\
+    --data-root /content/drive/MyDrive/fauxtography/data
+""",
+        ),
+        md(
+            """\
+## 7. Training / evaluation (GPU steps — run one at a time)
+
+The three model commands are heavy; run them in separate cells so a disconnect
+can't lose more than one step. Each reads its own config and writes results to
+Drive via the env vars above.
+"""
+        ),
+        code(
+            """\
+# Baseline — fine-tune the shared ResNet (joint)
+!/content/fxt-venv/bin/fauxtography train-baseline
+""",
+        ),
+        code(
+            """\
+# CLIP zero-shot — Collaborator A
+!/content/fxt-venv/bin/fauxtography eval-clip
+""",
+        ),
+        code(
+            """\
+# DINOv2 — extract features then train the linear probe (Collaborator B)
+!/content/fxt-venv/bin/fauxtography extract-dinov2
+!/content/fxt-venv/bin/fauxtography train-linear-probe
+""",
+        ),
+        md(
+            """\
+## 8. Backup sanity
+
+Confirm the outputs actually landed on Drive (they survive session drops).
+Then open `00_data_overview.ipynb` and the model analysis notebooks to
+inspect the results and write the verdicts.
+"""
+        ),
+        code(
+            """\
+!ls /content/drive/MyDrive/fauxtography/results
+!echo "---" && ls /content/drive/MyDrive/fauxtography/results/clip 2>/dev/null || echo "no clip results yet"
+""",
+        ),
+    ]
+
+
 def main() -> None:
     write("00_data_overview.ipynb", data_overview())
     write("analysis_clip.ipynb",
@@ -278,6 +454,7 @@ def main() -> None:
     write("analysis_dinov2.ipynb",
           model_analysis("dinov2", "DINOv2 + linear probe", "Collaborator B"))
     write("final_report.ipynb", final_report())
+    write("setup_colab.ipynb", setup_colab())
 
 
 if __name__ == "__main__":
