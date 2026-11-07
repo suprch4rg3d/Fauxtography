@@ -1,0 +1,20 @@
+# Baseline: fine-tuned ResNet
+arch: resnet18            # resnet18 (fast) or resnet50 (stronger)
+pretrained: true
+freeze_backbone: false    # false = fine-tune everything
+epochs: 12
+batch_size: 64
+lr: 0.001
+weight_decay: 0.0
+warmup_epochs: 1
+
+data:
+  root: data
+  image_size: 224
+  num_workers: 4
+  seed: 42
+
+output:
+  run_dir: experiments/runs
+  results_dir: results
+  report_name: metrics

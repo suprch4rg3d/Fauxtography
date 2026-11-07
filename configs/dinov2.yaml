@@ -1,0 +1,19 @@
+# DINOv2 feature extraction + linear probe
+arch: dinov2_vitb14       # s14 (fast) / b14 (default) / l14 (big, strong)
+feature_batch_size: 64
+probe_batch_size: 128
+probe_epochs: 20
+probe_lr: 0.01
+probe_weight_decay: 0.0
+num_workers: 4
+
+data:
+  root: data
+  image_size: 224
+  num_workers: 4
+  seed: 42
+
+output:
+  run_dir: experiments/runs
+  results_dir: results
+  report_name: metrics
