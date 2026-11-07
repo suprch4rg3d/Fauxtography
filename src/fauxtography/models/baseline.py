@@ -1,4 +1,4 @@
-"""STUB — Baseline: a standard CNN (ResNet) fine-tuned on real-vs-fake.
+"""STUB - Baseline: a standard CNN (ResNet) fine-tuned on real-vs-fake.
 
 Ownership: baseline is the shared reference point (optionally joint work).
 API contract:

@@ -1,4 +1,4 @@
-"""STUB — Plots for results: confusion matrix and error gallery.
+"""STUB - Plots for results: confusion matrix and error gallery.
 
 Shared by both collaborators (each plots their own model's matrix / error
 gallery; the compare step produces the side-by-side figure).

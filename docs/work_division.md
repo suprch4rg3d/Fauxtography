@@ -1,6 +1,6 @@
 # Work Division
 
-**Semester Group Project — MAI644 Computer Vision.**
+**Semester Group Project - MAI644 Computer Vision.**
 
 Two collaborators, one model each plus its written analysis. Joint analysis is
 also split so both contribute to the final report and presentation.
@@ -44,9 +44,9 @@ Each collaborator:
 
 ## Milestones (proposed)
 
-1. **M0 — data**: acquire dataset, run `fauxtography prepare-data`, commit
+1. **M0 - data**: acquire dataset, run `fauxtography prepare-data`, commit
    split counts.
-2. **M1 — baseline**: ResNet fine-tune, report loss/acc curves (shared).
-3. **M2/M3 — models in parallel** (each owner): CLIP zero-shot, DINOv2 probe.
-4. **M4 — analysis**: per-owner error inspection docs.
-5. **M5 — comparison + report + presentation** (joint).
+2. **M1 - baseline**: ResNet fine-tune, report loss/acc curves (shared).
+3. **M2/M3 - models in parallel** (each owner): CLIP zero-shot, DINOv2 probe.
+4. **M4 - analysis**: per-owner error inspection docs.
+5. **M5 - comparison + report + presentation** (joint).

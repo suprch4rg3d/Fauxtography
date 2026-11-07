@@ -36,7 +36,7 @@ def get_device(requested: str | torch.device = "auto") -> torch.device:
 
 
 def device_report() -> dict[str, str | bool]:
-    """Summary of the environment — used by the ``fauxtography env`` command."""
+    """Summary of the environment - used by the ``fauxtography env`` command."""
     torch_cuda = torch.cuda.is_available()
     mps_avail = getattr(torch.backends, "mps", None) is not None and torch.backends.mps.is_available()
     report = {

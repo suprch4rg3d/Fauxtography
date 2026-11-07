@@ -1,4 +1,4 @@
-# Notebooks — results & verdicts
+# Notebooks - results & verdicts
 
 The **analysis layer** of the project lives here. These are the notebooks you
 open in Google Colab (or locally) to inspect results, document the manual
@@ -6,7 +6,7 @@ error inspection, and write the verdicts that go on the presentation slides.
 
 | Notebook | Purpose | Owner |
 |----------|---------|-------|
-| `fauxtography-on-colab.ipynb` | **run first** in Colab: env, Drive, data split, training — everything in one notebook | shared |
+| `fauxtography-on-colab.ipynb` | **run first** in Colab: env, Drive, data split, training - everything in one notebook | shared |
 | `00_data_overview.ipynb` | confirm splits + class balance, sample grid | shared |
 | `analysis_clip.ipynb` | CLIP metrics, confusion matrix, error inspection, verdict | Collaborator A |
 | `analysis_dinov2.ipynb` | DINOv2 probe metrics, errors, verdict | Collaborator B |
@@ -31,7 +31,7 @@ error inspection, and write the verdicts that go on the presentation slides.
 
 Run `python scripts/make_notebooks.py` from the repo root to rebuild the
 notebooks from templates (e.g. after changing the template structure).
-**Don't edit the generated JSON by hand** — edit the templates and re-run.
+**Don't edit the generated JSON by hand** - edit the templates and re-run.
 
 ## Conventions
 

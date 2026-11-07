@@ -19,7 +19,7 @@ Path override env vars (set once, redirects every command):
 (see fauxtography.config).
 
 
-This is the only entry point — the old per-step ``scripts/*.py`` header
+This is the only entry point - the old per-step ``scripts/*.py`` header
 remainders have been folded into it.
 """
 
@@ -92,7 +92,7 @@ def cmd_train_baseline(args: argparse.Namespace) -> int:
 
     load_config("baseline", args.config)  # validate+warm the config at call time
     logger.info("TODO: implement baseline training (config=%s)", args.config)
-    raise NotImplementedError("Baseline training — see docs/milestones.")
+    raise NotImplementedError("Baseline training - see docs/milestones.")
 
 
 def cmd_eval_clip(args: argparse.Namespace) -> int:
@@ -100,7 +100,7 @@ def cmd_eval_clip(args: argparse.Namespace) -> int:
 
     load_config("clip", args.config)  # validate+warm the config at call time
     logger.info("TODO: implement CLIP zero-shot evaluation (config=%s)", args.config)
-    raise NotImplementedError("CLIP milestone — see docs/milestones.")
+    raise NotImplementedError("CLIP milestone - see docs/milestones.")
 
 
 def cmd_extract_dinov2(args: argparse.Namespace) -> int:
@@ -108,7 +108,7 @@ def cmd_extract_dinov2(args: argparse.Namespace) -> int:
 
     load_config("dinov2", args.config)  # validate+warm the config at call time
     logger.info("TODO: implement DINOv2 feature extraction (config=%s)", args.config)
-    raise NotImplementedError("DINOv2 milestone — see docs/milestones.")
+    raise NotImplementedError("DINOv2 milestone - see docs/milestones.")
 
 
 def cmd_train_linear_probe(args: argparse.Namespace) -> int:
@@ -116,18 +116,18 @@ def cmd_train_linear_probe(args: argparse.Namespace) -> int:
 
     load_config("dinov2", args.config)  # validate+warm the config at call time
     logger.info("TODO: implement linear probe training (config=%s)", args.config)
-    raise NotImplementedError("DINOv2 milestone — see docs/milestones.")
+    raise NotImplementedError("DINOv2 milestone - see docs/milestones.")
 
 
 def cmd_compare(args: argparse.Namespace) -> int:
     logger.info("TODO: implement model comparison (results-dir=%s)", args.results_dir)
-    raise NotImplementedError("Joint comparison — see docs/milestones.")
+    raise NotImplementedError("Joint comparison - see docs/milestones.")
 
 
 def cmd_env(args: argparse.Namespace) -> int:
     """Print the runtime/environment report (tensor stack + accelerator).
 
-    The first thing to run in a Colab session — confirms whether a GPU is
+    The first thing to run in a Colab session - confirms whether a GPU is
     actually attached before spending time on training.
     """
     from .utils.device import device_report
@@ -143,7 +143,7 @@ def cmd_env(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="fauxtography",
-        description="Detect real photographs vs AI-generated images.",
+        description="Detecting AI-Generated Images - distinguish real from fake.",
     )
     sub = parser.add_subparsers(dest="command", required=True, metavar="COMMAND")
 

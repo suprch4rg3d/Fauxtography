@@ -1,4 +1,4 @@
-"""STUB — CLIP zero-shot classification of real vs AI-generated images.
+"""STUB - CLIP zero-shot classification of real vs AI-generated images.
 
 Ownership: one collaborator owns CLIP + its analysis.
 API contract:

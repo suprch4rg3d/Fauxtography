@@ -1,4 +1,4 @@
-"""STUB — Linear probe trained on extracted DINOv2 features.
+"""STUB - Linear probe trained on extracted DINOv2 features.
 
 Ownership: DINOv2 collaborator.
 API contract:

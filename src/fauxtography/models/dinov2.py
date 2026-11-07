@@ -1,4 +1,4 @@
-"""STUB — DINOv2 feature extraction.
+"""STUB - DINOv2 feature extraction.
 
 Ownership: one collaborator owns DINOv2 + linear probe + its analysis.
 API contract:

@@ -1,6 +1,6 @@
 # Setup & Environment
 
-This project can be installed two ways — with **Poetry** or with **plain pip**
+This project can be installed two ways - with **Poetry** or with **plain pip**
 (via `requirements.txt`). Use whichever you're comfortable with; both produce
 the same runtime environment. Pick one per machine and stick to it.
 
@@ -9,7 +9,7 @@ verified against macOS/arm64 + Python 3.14 + torch 2.15).
 
 ---
 
-## Option A — Poetry (preferred by the repo author)
+## Option A - Poetry (preferred by the repo author)
 
 Poetry 2.x reads the PEP 621 fields in `pyproject.toml` directly. Versions come
 from `poetry.lock` once generated, so teammates using Poetry get identical
@@ -38,7 +38,7 @@ poetry install --all-extras
   (`pytest`, `ruff`). If you only want runtime deps: `poetry install`.
 - `virtualenvs.in-project` is enabled, so the venv is created at
   `.venv/` inside the repo.
-- This generates `poetry.lock` on first run — **commit it** so your teammate
+- This generates `poetry.lock` on first run - **commit it** so your teammate
   gets the same pinned versions.
 
 ### 3. Configure the interpreter in your IDE
@@ -78,7 +78,7 @@ poetry install     # sync your venv with the lockfile
 
 ---
 
-## Option B — Plain pip (requirements.txt)
+## Option B - Plain pip (requirements.txt)
 
 If you don't use Poetry, install exactly the same pinned versions from the
 requirements files with the standard `venv` + `pip` flow. Works on any setup.
@@ -150,7 +150,7 @@ from `poetry.lock`.)
 
 The pipeline runs headless on Colab like anywhere else; the GPU is attached to
 the session and the `fauxtography` CLI picks it up automatically. Use
-**GPU**, not TPU — only the baseline truly trains, and a T4 is enough for all
+**GPU**, not TPU - only the baseline truly trains, and a T4 is enough for all
 three models at project scale.
 
 **Quickest path:** open `notebooks/fauxtography-on-colab.ipynb` and run cells
@@ -159,7 +159,7 @@ top to bottom. It does everything below for you in one go.
 ### Manually, cell by cell
 
 ```python
-# 1. uv (installs a Python 3.14 interpreter on demand — Colab ships 3.11/3.12)
+# 1. uv (installs a Python 3.14 interpreter on demand - Colab ships 3.11/3.12)
 !pip install -q uv
 
 # 2. env + package (after cloning or mounting the repo)
@@ -189,7 +189,7 @@ os.environ["FAUXTOGRAPHY_RESULTS_DIR"] = "/content/drive/MyDrive/fauxtography/re
 `FAUXTOGRAPHY_DATA_ROOT`, `FAUXTOGRAPHY_RUN_DIR` and
 `FAUXTOGRAPHY_RESULTS_DIR` override the matching fields in every config
 (implemented in `src/fauxtography/config.py`). Set them once in a session and
-every command respects them — no YAML edits, no per-command flags.
+every command respects them - no YAML edits, no per-command flags.
 
 ### Notes for Colab
 
@@ -208,21 +208,21 @@ every command respects them — no YAML edits, no per-command flags.
 
 ## Troubleshooting
 
-- **``fauxtography: command not found``** — the console script comes from the
+- **``fauxtography: command not found``** - the console script comes from the
   package's `[project.scripts]` entry point, so the package must be installed
   editable (or as a normal install). Run `pip install -e .` (pip) or
   `poetry install` (Poetry), then retry.
-- **``ModuleNotFoundError: fauxtography``** — the package isn't installed
+- **``ModuleNotFoundError: fauxtography``** - the package isn't installed
   editable. Run `pip install -e .` (pip) or `poetry install` (Poetry).
-- **Wrong Python version** — the project needs 3.14. Check `python3.14 --version`;
+- **Wrong Python version** - the project needs 3.14. Check `python3.14 --version`;
   if 3.14 isn't on your PATH, install it (e.g. `brew install python@3.14`).
-- **Colab shows `device=cpu`** — no GPU attached. Runtime → Change runtime
+- **Colab shows `device=cpu`** - no GPU attached. Runtime → Change runtime
   type → Hardware accelerator → **GPU** (or L4), then re-run `fauxtography env`.
-- **Colab env vars not picked up** — the `FAUXTOGRAPHY_*` overrides are read at
+- **Colab env vars not picked up** - the `FAUXTOGRAPHY_*` overrides are read at
   config-load time per command, so re-run the command *after* setting them in
   the same session.
-- **`pytest` not found** — dev extras were skipped. Use `--all-extras`
+- **`pytest` not found** - dev extras were skipped. Use `--all-extras`
   (Poetry) or `requirements-dev.txt` (pip).
-- **Ideas for GPU vs CPU** — torch 2.15 wheels are the same across CUDA/CPU
+- **Ideas for GPU vs CPU** - torch 2.15 wheels are the same across CUDA/CPU
   installs on Apple Silicon; on a machine with an NVIDIA GPU the CUDA wheels
   install automatically via pip. No extra steps needed for development.

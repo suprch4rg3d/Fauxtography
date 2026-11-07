@@ -59,7 +59,7 @@ def data_overview() -> list[dict]:
     return [
         md(
             """\
-# 00 — Data Overview
+# 00 - Data Overview
 
 **Purpose:** confirm the dataset is loaded as expected and inspect the class
 balance / a few samples before any model work. Executes against the split
@@ -126,13 +126,13 @@ def model_analysis(model: str, title: str, owner: str) -> list[dict]:
     return [
         md(
             f"""\
-# Analysis — {title}
+# Analysis - {title}
 
 **Owner:** {owner}   |   **Model dir:** `results/{name}/`
 
 What this notebook adds: the numbers behind the verdict. It loads the saved
 metrics + predictions produced by the eval script, redraws the confusion
-matrix for this model, and documents the *manual error inspection* — the
+matrix for this model, and documents the *manual error inspection* - the
 core of the project's analysis strategy.
 """
         ),
@@ -154,7 +154,7 @@ if metrics:
     import pandas as pd
     print(pd.DataFrame(metrics["classification_report"]).T.round(3))
 else:
-    print("No metrics yet — run `fauxtography eval-clip` (for CLIP) first.")
+    print("No metrics yet - run `fauxtography eval-clip` (for CLIP) first.")
 """
         ),
         md("## 2. Confusion matrix"),
@@ -206,7 +206,7 @@ else:
 #   - Where does this model stand versus the others?
 #   - What kind of image fools it?
 #   - One-sentence takeaway.
-print("TODO: verdict for this model — see docs/analysis_<model>.md for the write-up")
+print("TODO: verdict for this model - see docs/analysis_<model>.md for the write-up")
 """
         ),
     ]
@@ -219,7 +219,7 @@ def final_report() -> list[dict]:
     return [
         md(
             """\
-# Final Report — comparing baseline / CLIP / DINOv2
+# Final Report - comparing baseline / CLIP / DINOv2
 
 **Joint step, both collaborators.** Loads every model's saved metrics and
 produces the side-by-side comparison that goes on the presentation slides.
@@ -257,7 +257,7 @@ if not df.empty:
     ax.set_title("Model comparison")
     plt.show()
 else:
-    print("No results yet — run baseline, eval-clip, and the DINOv2 probe first.")
+    print("No results yet - run baseline, eval-clip, and the DINOv2 probe first.")
 """
         ),
         md("## 3. Takeaway verdicts"),
@@ -271,14 +271,14 @@ print("TODO: joint conclusions")
 
 
 # --------------------------------------------------------------------------- #
-# fauxtography-on-colab.ipynb — run this FIRST in a Colab session; it does
+# fauxtography-on-colab.ipynb - run this FIRST in a Colab session; it does
 # everything in one go (env, Drive, data split, training).
 # --------------------------------------------------------------------------- #
 def fauxtography_on_colab() -> list[dict]:
     return [
         md(
             """\
-# Fauxtography on Colab — run everything in one go
+# Fauxtography on Colab - run everything in one go
 
 Run this first in a **Google Colab GPU** runtime. This notebook does the
 whole pipeline: environment, Drive, data split and the model training steps.
@@ -288,7 +288,7 @@ GPU. It is *not* the analysis (those live in the other notebooks); it:
 
 1. clones the repo (or reuses an already-mounted Drive copy)
 2. creates a **Python 3.14** env with `uv` (Colab's own Python is 3.11/3.12,
-   which our deps pin away from — see `docs/setup.md`)
+   which our deps pin away from - see `docs/setup.md`)
 3. installs the package
 4. verifies the accelerator with `fauxtography env`
 5. splits the dataset and runs the model commands (the GPU steps)
@@ -381,7 +381,7 @@ DATA_ROOT = "/content/drive/MyDrive/fauxtography/data"     # WHERE IS YOUR DATAS
 RUN_DIR = "/content/drive/MyDrive/fauxtography/experiments"   # checkpoints / features
 RESULTS_DIR = "/content/drive/MyDrive/fauxtography/results"   # committed metrics
 
-# Export overrides — the CLI/package pick these up automatically.
+# Export overrides - the CLI/package pick these up automatically.
 os.environ["FAUXTOGRAPHY_DATA_ROOT"] = DATA_ROOT
 os.environ["FAUXTOGRAPHY_RUN_DIR"] = RUN_DIR
 os.environ["FAUXTOGRAPHY_RESULTS_DIR"] = RESULTS_DIR
@@ -406,7 +406,7 @@ Safe to rerun; copies into ``data/`` under your Drive.
         ),
         md(
             """\
-## 7. Training / evaluation (GPU steps — run one at a time)
+## 7. Training / evaluation (GPU steps - run one at a time)
 
 The three model commands are heavy; run them in separate cells so a disconnect
 can't lose more than one step. Each reads its own config and writes results to
@@ -415,19 +415,19 @@ Drive via the env vars above.
         ),
         code(
             """\
-# Baseline — fine-tune the shared ResNet (joint)
+# Baseline - fine-tune the shared ResNet (joint)
 !/content/fxt-venv/bin/fauxtography train-baseline
 """,
         ),
         code(
             """\
-# CLIP zero-shot — Collaborator A
+# CLIP zero-shot - Collaborator A
 !/content/fxt-venv/bin/fauxtography eval-clip
 """,
         ),
         code(
             """\
-# DINOv2 — extract features then train the linear probe (Collaborator B)
+# DINOv2 - extract features then train the linear probe (Collaborator B)
 !/content/fxt-venv/bin/fauxtography extract-dinov2
 !/content/fxt-venv/bin/fauxtography train-linear-probe
 """,
@@ -451,14 +451,14 @@ inspect the results and write the verdicts.
             """\
 ## 9. Publish results to git
 
-Colab runs on your branch — these cells copy the results from Drive into the
+Colab runs on your branch - these cells copy the results from Drive into the
 repo and **stage only `results/`** (the small committed artifacts: json, svg,
 csv). Checkpoints and features are already git-ignored, so nothing heavy gets
 staged.
 
 Deliberately *not* automated: review what's staged, then commit and push
 **from your own branch** and open a PR into `dev` (see `docs/work_division.md`).
-No credentials are handled here — set up GitHub auth on the machine/terminal
+No credentials are handled here - set up GitHub auth on the machine/terminal
 that pushes (e.g. a PAT scoped to this repo).
 """
         ),
@@ -482,7 +482,7 @@ print("review the staged list, then commit + push from your branch")
 #   git commit -m "Add <model> results"
 #   git push origin <your-branch>
 #   # then open a PR: <your-branch> -> dev
-print("manual step — see cells above")
+print("manual step - see cells above")
 """,
         ),
     ]

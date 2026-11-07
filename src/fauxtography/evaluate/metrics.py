@@ -1,4 +1,4 @@
-"""STUB — Metrics: accuracy, per-class precision/recall/F1, confusion matrix.
+"""STUB - Metrics: accuracy, per-class precision/recall/F1, confusion matrix.
 
 All functions are model-agnostic: they consume ``(y_true, y_pred)`` arrays from
 any of the three methods so comparison is apples-to-apples. Shared by both
