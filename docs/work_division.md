@@ -9,19 +9,20 @@ also split so both contribute to the final report and presentation.
 
 | Area | Owner | Files |
 |------|-------|-------|
-| Data prep & split infrastructure | **shared** | `scripts/prepare_data.py`, `src/fauxtography/data/` |
-| Baseline ResNet fine-tune | **shared** (reference point) | `src/fauxtography/models/baseline.py`, `scripts/train_baseline.py` |
-| CLIP zero-shot **+ its analysis** | **Collaborator A** | `src/fauxtography/models/clip.py`, `scripts/eval_clip.py`, `docs/analysis_clip.md` |
-| DINOv2 + linear probe **+ its analysis** | **Collaborator B** | `src/fauxtography/models/dinov2.py`, `models/linear_probe.py`, `scripts/extract_dinov2.py`, `scripts/train_linear_probe.py`, `docs/analysis_dinov2.md` |
-| Joint comparison & presentation | **split / joint** | `scripts/compare_models.py`, `docs/final_report.md`, slides |
+| Data prep & split infrastructure | **shared** | `prepare-data` CLI + `src/fauxtography/data/` |
+| Baseline ResNet fine-tune | **shared** (reference point) | `train-baseline` CLI, `src/fauxtography/models/baseline.py` |
+| CLIP zero-shot **+ its analysis** | **Collaborator A** | `eval-clip` CLI, `src/fauxtography/models/clip.py`, `notebooks/analysis_clip.ipynb`, `docs/analysis_clip.md` |
+| DINOv2 + linear probe **+ its analysis** | **Collaborator B** | `extract-dinov2` + `train-linear-probe` CLIs, `models/dinov2.py`, `models/linear_probe.py`, `notebooks/analysis_dinov2.ipynb`, `docs/analysis_dinov2.md` |
+| Joint comparison & presentation | **split / joint** | `compare` CLI, `notebooks/final_report.ipynb`, `docs/final_report.md`, slides |
 
 ## How the model + analysis pairing works
 
 Each collaborator:
 
 1. Implements their model code on their own branch (from `dev`).
-2. Runs their eval script → commits results under `results/<model>/`.
-3. Writes `docs/analysis_<model>.md`: confusion matrix reading, the **manual
+2. Runs their eval command → commits results under `results/<model>/`.
+3. Renders the verdict in `notebooks/analysis_<model>.ipynb` and writes the
+   `docs/analysis_<model>.md` write-up: confusion matrix reading, the **manual
    visual error inspection** (which images fool the model, what visual
    artifacts), plus the method-design decisions they made.
 

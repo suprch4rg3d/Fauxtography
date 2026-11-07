@@ -24,8 +24,9 @@ see [`docs/setup.md`](docs/setup.md) for full instructions.
 
 ```
 docs/                     plan + work division + per-model analysis write-ups
-src/fauxtography/         package (data, models, evaluate, utils, config)
-scripts/                  runnable pipeline entry points
+notebooks/                analysis layer: results, error inspection, verdicts
+src/fauxtography/         package (data, models, evaluate, utils, config, cli)
+scripts/                  CLI wrappers + make_notebooks generator
 configs/                  per-model YAML configs
 tests/                    smoke tests
 data/                     (git-ignored) raw + split dataset
@@ -35,10 +36,12 @@ results/                  committed metrics + figures for the report
 
 ## Status
 
-Scaffolding complete: package layout, configs, shared data pipeline
-(`prepare_data.py`), and per-model API stubs are in place. Model
-implementations are intentionally stubbed (`NotImplementedError`) — they are
-filled in per owner as the milestones land.
+Scaffolding complete: package layout, configs, shared data pipeline, CLI,
+and per-model API stubs are in place. Model implementations are intentionally
+stubbed (`NotImplementedError`) — filled in per owner as the milestones land.
+The analysis layer lives in `notebooks/` (results, error inspection, verdicts),
+run in Colab on a GPU; the pipeline itself runs headless via the `fauxtography`
+CLI.
 
 ## Workflow
 
