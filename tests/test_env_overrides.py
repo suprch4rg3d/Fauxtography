@@ -1,7 +1,5 @@
 """Env-var path overrides and device resolution (Colab-related)."""
 
-import os
-
 import torch
 
 from fauxtography.config import load_config

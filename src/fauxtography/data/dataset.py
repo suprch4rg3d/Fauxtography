@@ -45,7 +45,7 @@ class FauxtoDataset(Dataset):
         return CLASS_NAMES
 
 
-def get_datasets(data_cfg, train_transform, eval_transform, *, use_validation: bool = True):
+def get_datasets(data_cfg, train_transform, eval_transform):
     """Return ``{train, val, test}`` datasets; raise if a split is missing."""
     root = Path(data_cfg.root)
     splits: dict[str, FauxtoDataset] = {}
@@ -54,7 +54,7 @@ def get_datasets(data_cfg, train_transform, eval_transform, *, use_validation: b
         if folder.exists() and any(folder.iterdir()):
             transform = train_transform if split == "train" else eval_transform
             splits[split] = FauxtoDataset(folder, transform=transform)
-    missing = {"train", "val", "test"} - set(splits) if use_validation else {"train", "test"} - set(splits)
+    missing = {"train", "val", "test"} - set(splits)
     if missing:
         raise FileNotFoundError(
             f"Data root {root} is missing split(s) {sorted(missing)}. "

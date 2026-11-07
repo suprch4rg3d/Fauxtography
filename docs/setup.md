@@ -107,8 +107,8 @@ pip install -r requirements.txt
 
 ### 3. Install the project itself (editable)
 
-The scripts and tests import the `fauxtography` package, so install it in
-editable mode:
+The CLI, tests and notebooks all import the `fauxtography` package, so install
+it in editable mode:
 
 ```bash
 pip install -e .

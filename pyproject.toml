@@ -34,3 +34,10 @@ testpaths = ["tests"]
 [tool.ruff]
 line-length = 100
 target-version = "py314"
+# Generated artifacts, envs and caches — lint only hand-written code.
+extend-exclude = [
+    "notebooks/",   # generated .ipynb artifacts
+    ".venv/",
+    "data/",
+    "experiments/",
+]

@@ -3,4 +3,4 @@
 from .dataset import CLASS_NAMES, FauxtoDataset, get_datasets
 from .transforms import ModelTransforms
 
-__all__ = ["CLASS_NAMES", "FauxtoDataset", "get_datasets", "ModelTransforms"]
+__all__ = ["CLASS_NAMES", "FauxtoDataset", "ModelTransforms", "get_datasets"]

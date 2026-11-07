@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Generate the analysis notebooks as valid .ipynb files.
 
 Run once (or re-run to refresh): `python scripts/make_notebooks.py`.
@@ -160,7 +159,7 @@ else:
         ),
         md("## 2. Confusion matrix"),
         code(
-            f"""\
+            """\
 from sklearn.metrics import confusion_matrix
 from fauxtography.data.dataset import CLASS_NAMES, REAL_IDX, FAKE_IDX
 
@@ -183,7 +182,7 @@ else:
         ),
         md("## 3. Manual error inspection"),
         code(
-            f"""\
+            """\
 # Load a few misclassified images and inspect what confused the model.
 # Fill in: what visual artifacts / styles fooled the model? (presentation gold.)
 # NOTE: to see the actual images, load the test set with fauxtography
@@ -192,7 +191,7 @@ else:
 import numpy as np
 if y_true is not None:
     errors = np.where(y_true != y_pred)[0]
-    print(f"{{len(errors)}} misclassified (of {{len(y_true)}}): {{len(errors)/len(y_true):.1%}}")
+    print(f"{len(errors)} misclassified (of {len(y_true)}): {len(errors)/len(y_true):.1%}")
     for idx in errors[:6]:
         print("sample index", idx, "true=", CLASS_NAMES[y_true[idx]],
               "pred=", CLASS_NAMES[y_pred[idx]])

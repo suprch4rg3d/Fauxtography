@@ -71,7 +71,7 @@ def cmd_prepare_data(args: argparse.Namespace) -> int:
         files = _iter_images(source)
         rng.shuffle(files)
         n = len(files)
-        counts = [int(round(n * fraction)) for fraction in args.splits[:2]]
+        counts = [round(n * fraction) for fraction in args.splits[:2]]
         counts.append(n - sum(counts))
         logger.info("class=%s files=%d -> train=%d val=%d test=%d", class_name, n, *counts)
 
@@ -90,7 +90,7 @@ def cmd_prepare_data(args: argparse.Namespace) -> int:
 def cmd_train_baseline(args: argparse.Namespace) -> int:
     from .config import load_config
 
-    cfg = load_config("baseline", args.config)
+    load_config("baseline", args.config)  # validate+warm the config at call time
     logger.info("TODO: implement baseline training (config=%s)", args.config)
     raise NotImplementedError("Baseline training — see docs/milestones.")
 
@@ -98,7 +98,7 @@ def cmd_train_baseline(args: argparse.Namespace) -> int:
 def cmd_eval_clip(args: argparse.Namespace) -> int:
     from .config import load_config
 
-    cfg = load_config("clip", args.config)
+    load_config("clip", args.config)  # validate+warm the config at call time
     logger.info("TODO: implement CLIP zero-shot evaluation (config=%s)", args.config)
     raise NotImplementedError("CLIP milestone — see docs/milestones.")
 
@@ -106,7 +106,7 @@ def cmd_eval_clip(args: argparse.Namespace) -> int:
 def cmd_extract_dinov2(args: argparse.Namespace) -> int:
     from .config import load_config
 
-    cfg = load_config("dinov2", args.config)
+    load_config("dinov2", args.config)  # validate+warm the config at call time
     logger.info("TODO: implement DINOv2 feature extraction (config=%s)", args.config)
     raise NotImplementedError("DINOv2 milestone — see docs/milestones.")
 
@@ -114,7 +114,7 @@ def cmd_extract_dinov2(args: argparse.Namespace) -> int:
 def cmd_train_linear_probe(args: argparse.Namespace) -> int:
     from .config import load_config
 
-    cfg = load_config("dinov2", args.config)
+    load_config("dinov2", args.config)  # validate+warm the config at call time
     logger.info("TODO: implement linear probe training (config=%s)", args.config)
     raise NotImplementedError("DINOv2 milestone — see docs/milestones.")
 

@@ -22,7 +22,7 @@ def test_class_order_is_stable(tmp_path):
     assert ds.classes == ("real", "fake")
     # labels must be 0 for real, 1 for fake regardless of folder ordering
     for i in range(len(ds)):
-        img, label = ds[i]
+        _img, label = ds[i]  # label is what we assert on
         path = ds.folder.samples[i][0]
         if "real" in str(path):
             assert label == REAL_IDX
