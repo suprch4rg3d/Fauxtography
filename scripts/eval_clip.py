@@ -1,30 +1,16 @@
 #!/usr/bin/env python3
-"""SKELETON — zero-shot CLIP evaluation on the test split.
+"""Thin wrapper for the ``eval-clip`` command.
 
-Owner: CLIP collaborator. Produces results/clip/metrics.json,
-confusion matrix figure, and the y_true/y_pred arrays for analysis.
+Preferred invocation (after ``pip install -e .`` / ``poetry install``):
+
+    poetry run fauxtography eval-clip --help
 """
 
 from __future__ import annotations
 
-import argparse
-from pathlib import Path
+import sys
 
-from fauxtography.config import load_config
-from fauxtography.utils.logging import get_logger
-
-logger = get_logger(__name__)
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(__doc__.strip().splitlines()[0])
-    parser.add_argument("--config", default="configs/clip.yaml", type=Path)
-    args = parser.parse_args()
-
-    cfg = load_config("clip", args.config)
-    logger.info("TODO: implement CLIP zero-shot evaluation (config=%s)", args.config)
-    raise NotImplementedError("CLIP milestone — see docs/milestones.")
-
+from fauxtography.cli import main
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main(["eval-clip", *sys.argv[1:]]))

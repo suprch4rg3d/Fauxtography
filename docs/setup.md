@@ -56,8 +56,9 @@ poetry env info --path      # prints the venv path
 ### 4. Everyday commands
 
 ```bash
-poetry run python scripts/prepare_data.py --help   # run a script (auto-venv)
-poetry run pytest                                   # run tests in the venv
+poetry run fauxtography --help                    # list all subcommands (auto-venv)
+poetry run fauxtography prepare-data --help       # any pipeline step
+poetry run pytest                                  # run tests in the venv
 poetry add <package>                                # add a runtime dep
 poetry add --group dev <package>                    # add a dev dep
 poetry run python -m pip list                       # inspect installed
@@ -116,8 +117,9 @@ pip install -e .
 ### 4. Everyday commands
 
 ```bash
-python scripts/prepare_data.py --help   # run a script (venv active)
-pytest                                  # run tests
+fauxtography --help                    # list all subcommands (venv active)
+fauxtography prepare-data --help       # any pipeline step
+pytest                                 # run tests
 pip install <package>                   # add a dep
 pip freeze > requirements.txt           # regenerate pins (see note below)
 ```
@@ -146,6 +148,10 @@ from `poetry.lock`.)
 
 ## Troubleshooting
 
+- **``fauxtography: command not found``** — the console script comes from the
+  package's `[project.scripts]` entry point, so the package must be installed
+  editable (or as a normal install). Run `pip install -e .` (pip) or
+  `poetry install` (Poetry), then retry.
 - **``ModuleNotFoundError: fauxtography``** — the package isn't installed
   editable. Run `pip install -e .` (pip) or `poetry install` (Poetry).
 - **Wrong Python version** — the project needs 3.14. Check `python3.14 --version`;

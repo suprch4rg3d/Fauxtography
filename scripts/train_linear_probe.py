@@ -1,30 +1,16 @@
 #!/usr/bin/env python3
-"""SKELETON — train and evaluate a linear probe on cached DINOv2 features.
+"""Thin wrapper for the ``train-linear-probe`` command.
 
-Owner: DINOv2 collaborator. Produces results/dinov2/metrics.json, confusion
-matrix, and y_true/y_pred arrays for analysis.
+Preferred invocation (after ``pip install -e .`` / ``poetry install``):
+
+    poetry run fauxtography train-linear-probe --help
 """
 
 from __future__ import annotations
 
-import argparse
-from pathlib import Path
+import sys
 
-from fauxtography.config import load_config
-from fauxtography.utils.logging import get_logger
-
-logger = get_logger(__name__)
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(__doc__.strip().splitlines()[0])
-    parser.add_argument("--config", default="configs/dinov2.yaml", type=Path)
-    args = parser.parse_args()
-
-    cfg = load_config("dinov2", args.config)
-    logger.info("TODO: implement linear probe training (config=%s)", args.config)
-    raise NotImplementedError("DINOv2 milestone — see docs/milestones.")
-
+from fauxtography.cli import main
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main(["train-linear-probe", *sys.argv[1:]]))

@@ -52,23 +52,28 @@ source .venv/bin/activate
 pip install -r requirements-dev.txt
 pip install -e .
 
+# CLI (installed by the package; run commands through it)
+poetry run fauxtography --help             # list every subcommand
+
 # prepare data (real + fake folders) -> data/train|val|test/{real,fake}
-python scripts/prepare_data.py --source-real <real_dir> --source-fake <fake_dir>
+poetry run fauxtography prepare-data --source-real <real_dir> --source-fake <fake_dir>
 
 # per-model experiments (implemented in their milestones)
-python scripts/train_baseline.py            # shared baseline
-python scripts/eval_clip.py                 # collaborator A
-python scripts/extract_dinov2.py            # collaborator B
-python scripts/train_linear_probe.py        # collaborator B
+poetry run fauxtography train-baseline            # shared baseline
+poetry run fauxtography eval-clip                 # collaborator A
+poetry run fauxtography extract-dinov2            # collaborator B
+poetry run fauxtography train-linear-probe        # collaborator B
 
 # compare & test
-python scripts/compare_models.py
+poetry run fauxtography compare
 pytest
 ```
 
-Each script reads `configs/<model>.yaml` (override with `--config <path>`).
-Runs are reproducible via `seed` in each config. See
-[`docs/setup.md`](docs/setup.md) for detailed setup and troubleshooting.
+All subcommands accept `--help`. Each experiment command reads
+`configs/<model>.yaml` by default (override with `--config <path>`); runs are
+reproducible via `seed` in each config. The legacy `scripts/*.py` files remain
+as thin wrappers (`python scripts/prepare_data.py ...`) and behave identically.
+See [`docs/setup.md`](docs/setup.md) for detailed setup and troubleshooting.
 
 ## Hardware
 
