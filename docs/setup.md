@@ -146,6 +146,66 @@ from `poetry.lock`.)
 
 ---
 
+## Google Colab (GPU)
+
+The pipeline runs headless on Colab like anywhere else; the GPU is attached to
+the session and the `fauxtography` CLI picks it up automatically. Use
+**GPU**, not TPU — only the baseline truly trains, and a T4 is enough for all
+three models at project scale.
+
+**Quickest path:** open `notebooks/setup_colab.ipynb` and run cells top to
+bottom. It does everything below for you.
+
+### Manually, cell by cell
+
+```python
+# 1. uv (installs a Python 3.14 interpreter on demand — Colab ships 3.11/3.12)
+!pip install -q uv
+
+# 2. env + package (after cloning or mounting the repo)
+!uv venv --python 3.14 /content/fxt-venv
+!uv pip install --python /content/fxt-venv/bin/python -e .
+
+# 3. verify the accelerator BEFORE training anything
+!/content/fxt-venv/bin/fauxtography env
+#    expect: device=cuda, cuda_available=True, gpu_name=Tesla T4
+
+# 4. redirect data/outputs to Drive so they survive session disconnects
+import os
+os.environ["FAUXTOGRAPHY_DATA_ROOT"] = "/content/drive/MyDrive/fauxtography/data"
+os.environ["FAUXTOGRAPHY_RUN_DIR"] = "/content/drive/MyDrive/fauxtography/experiments"
+os.environ["FAUXTOGRAPHY_RESULTS_DIR"] = "/content/drive/MyDrive/fauxtography/results"
+
+# 5. split + train (run each model in its own cell)
+!/content/fxt-venv/bin/fauxtography prepare-data --source-real R --source-fake F --data-root ...
+!/content/fxt-venv/bin/fauxtography train-baseline
+!/content/fxt-venv/bin/fauxtography eval-clip
+!/content/fxt-venv/bin/fauxtography extract-dinov2
+!/content/fxt-venv/bin/fauxtography train-linear-probe
+```
+
+### How the path redirection works
+
+`FAUXTOGRAPHY_DATA_ROOT`, `FAUXTOGRAPHY_RUN_DIR` and
+`FAUXTOGRAPHY_RESULTS_DIR` override the matching fields in every config
+(implemented in `src/fauxtography/config.py`). Set them once in a session and
+every command respects them — no YAML edits, no per-command flags.
+
+### Notes for Colab
+
+- **Runtime disconnect is the norm.** Sessions drop after ~90 min idle (or
+  ~12 h). Treat the session as throwaway compute: inputs/outputs live on
+  Drive, the repo is re-fetched each session.
+- **Results live on Drive; notebooks read them from there.** After training,
+  analysis notebooks (`00_data_overview`, `analysis_*`) read `results/` and
+  the data root from the same env vars.
+- **`num_workers`** is already fine at 4 on Colab (Linux); `pin_memory` is
+  handled by the shared loader.
+- **TPU is not supported/needed.** torch runs on TPU only through `torch_xla`
+  with a different data path; our workloads don't need it (see README).
+
+---
+
 ## Troubleshooting
 
 - **``fauxtography: command not found``** — the console script comes from the
@@ -156,6 +216,11 @@ from `poetry.lock`.)
   editable. Run `pip install -e .` (pip) or `poetry install` (Poetry).
 - **Wrong Python version** — the project needs 3.14. Check `python3.14 --version`;
   if 3.14 isn't on your PATH, install it (e.g. `brew install python@3.14`).
+- **Colab shows `device=cpu`** — no GPU attached. Runtime → Change runtime
+  type → Hardware accelerator → **GPU** (or L4), then re-run `fauxtography env`.
+- **Colab env vars not picked up** — the `FAUXTOGRAPHY_*` overrides are read at
+  config-load time per command, so re-run the command *after* setting them in
+  the same session.
 - **`pytest` not found** — dev extras were skipped. Use `--all-extras`
   (Poetry) or `requirements-dev.txt` (pip).
 - **Ideas for GPU vs CPU** — torch 2.15 wheels are the same across CUDA/CPU

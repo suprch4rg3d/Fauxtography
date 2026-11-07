@@ -72,16 +72,21 @@ poetry run fauxtography compare
 pytest
 ```
 
-All subcommands accept `--help`. Each experiment command reads
-`configs/<model>.yaml` by default (override with `--config <path>`); runs are
-reproducible via `seed` in each config. The legacy `scripts/*.py` files remain
-as thin wrappers (`python scripts/prepare_data.py ...`) and behave identically.
-See [`docs/setup.md`](docs/setup.md) for detailed setup and troubleshooting.
+All subcommands accept `--help`, and `fauxtography env` prints the
+accelerator/torch report (run it first on Colab to confirm a GPU is attached).
+Each experiment command reads `configs/<model>.yaml` by default (override with
+`--config <path>`); runs are reproducible via `seed` in each config. The legacy
+`scripts/*.py` files remain as thin wrappers and behave identically. See
+[`docs/setup.md`](docs/setup.md), which includes a full **Google Colab (GPU)**
+section.
 
 ## Hardware
 
-Scripts auto-detect CUDA → MPS (Apple Silicon) → CPU. Verified working on an
-Apple M4 (Python 3.14, torch 2.15).
+Devices resolve in one place (`utils/device.py`): CUDA → MPS (Apple Silicon) →
+CPU. Verified on an Apple M4 (Python 3.14, torch 2.15); training and eval are
+meant to run on a **Colab GPU** (T4/L4 is enough — no TPU needed). Set
+`FAUXTOGRAPHY_DATA_ROOT` / `RUN_DIR` / `RESULTS_DIR` to redirect where data and
+outputs live (e.g. a Colab Drive mount).
 
 ## Git workflow
 
