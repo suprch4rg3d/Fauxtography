@@ -11,7 +11,12 @@ comparing three approaches on a shared test set:
 
 *MAI644 Computer Vision* final project — plan in
 [`Docs/technical_plan.md`](Docs/technical_plan.md),
-team split in [`Docs/work_division.md`](Docs/work_division.md).
+team split in [`Docs/work_division.md`](Docs/work_division.md),
+setup in [`Docs/setup.md`](Docs/setup.md).
+
+**Install:** use either [Poetry](Docs/setup.md#option-a--poetry-preferred-by-the-repo-author) or
+[pip + requirements.txt](Docs/setup.md#option-b--plain-pip-requirementstxt) —
+see [`Docs/setup.md`](Docs/setup.md) for full instructions.
 
 ## Repo layout
 
@@ -36,9 +41,14 @@ filled in per owner as the milestones land.
 ## Workflow
 
 ```bash
-# create venv & install
-uv venv --python 3.15 .venv
-uv pip install -e ".[dev]"        # or: pip install -e ".[dev]"
+# --- Poetry ---
+poetry install --all-extras
+
+# --- or plain pip ---
+python3.15 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+pip install -e .
 
 # prepare data (real + fake folders) -> data/train|val|test/{real,fake}
 python scripts/prepare_data.py --source-real <real_dir> --source-fake <fake_dir>
@@ -55,7 +65,8 @@ pytest
 ```
 
 Each script reads `configs/<model>.yaml` (override with `--config <path>`).
-Runs are reproducible via `seed` in each config.
+Runs are reproducible via `seed` in each config. See
+[`Docs/setup.md`](Docs/setup.md) for detailed setup and troubleshooting.
 
 ## Hardware
 
