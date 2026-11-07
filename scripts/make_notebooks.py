@@ -448,6 +448,44 @@ inspect the results and write the verdicts.
 !echo "---" && ls /content/drive/MyDrive/fauxtography/results/clip 2>/dev/null || echo "no clip results yet"
 """,
         ),
+        md(
+            """\
+## 9. Publish results to git
+
+Colab runs on your branch — these cells copy the results from Drive into the
+repo and **stage only `results/`** (the small committed artifacts: json, svg,
+csv). Checkpoints and features are already git-ignored, so nothing heavy gets
+staged.
+
+Deliberately *not* automated: review what's staged, then commit and push
+**from your own branch** and open a PR into `dev` (see `docs/work_division.md`).
+No credentials are handled here — set up GitHub auth on the machine/terminal
+that pushes (e.g. a PAT scoped to this repo).
+"""
+        ),
+        code(
+            """\
+# Bring the results (on Drive) into the cloned repo so git sees them
+import shutil
+shutil.rmtree("/content/fauxtography/results", ignore_errors=True)
+shutil.copytree("/content/drive/MyDrive/fauxtography/results", "/content/fauxtography/results")
+# Stage only results/ (checkpoints + features stay out; they are gitignored)
+!cd /content/fauxtography && git add results/
+!cd /content/fauxtography && git status --short results/
+print("review the staged list, then commit + push from your branch")
+""",
+        ),
+        code(
+            """\
+# ---- do this on your branch / terminal, NOT automatically here ----
+#   cd /content/fauxtography
+#   git add results/
+#   git commit -m "Add <model> results"
+#   git push origin <your-branch>
+#   # then open a PR: <your-branch> -> dev
+print("manual step — see cells above")
+""",
+        ),
     ]
 
 
