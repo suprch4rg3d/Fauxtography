@@ -246,5 +246,9 @@ Icon
 .TemporaryItems
 .apdisk
 
-# Generated dataset inspection plots (regenerable via dataset_inspector.py)
-data/processed/dream_pyrfume/inspection/
+# Dataset (large) and experiment artifacts (regenerable or too big for git)
+/data/*
+!/data/README.md
+/experiments/*
+!/experiments/README.md
+/figures/
