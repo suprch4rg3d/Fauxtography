@@ -1,5 +1,7 @@
 # Work Division
 
+**Semester Group Project — MAI644 Computer Vision.**
+
 Two collaborators, one model each plus its written analysis. Joint analysis is
 also split so both contribute to the final report and presentation.
 

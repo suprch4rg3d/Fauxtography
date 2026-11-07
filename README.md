@@ -1,5 +1,7 @@
 # Fauxtography — AI Image Detection
 
+**Semester Group Project — MAI644 Computer Vision.**
+
 Detect whether an image is a **real photograph** or **AI-generated**, by
 comparing three approaches on a shared test set:
 
@@ -9,8 +11,10 @@ comparing three approaches on a shared test set:
 | 2 | CLIP zero-shot | foundation (vision-language) | none |
 | 3 | DINOv2 + linear probe | foundation (self-supervised vision) | linear head only |
 
-*MAI644 Computer Vision* final project — plan in
-[`Docs/technical_plan.md`](Docs/technical_plan.md),
+*MAI644 Semester Group Project — Computer Vision* — key deliverables:
+[`Docs/technical_plan.md`](Docs/technical_plan.md), team split in
+[`Docs/work_division.md`](Docs/work_division.md), setup in
+[`Docs/setup.md`](Docs/setup.md).
 team split in [`Docs/work_division.md`](Docs/work_division.md),
 setup in [`Docs/setup.md`](Docs/setup.md).
 
