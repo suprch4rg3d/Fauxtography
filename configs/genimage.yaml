@@ -1,0 +1,36 @@
+# GenImage download configuration (data prep).
+#
+# Amount of data is decided HERE, by rows per class - because image count is
+# what drives training cost and accuracy. Start small, measure, then raise it.
+# Mirror rows: each shard holds ~1,720 images.
+#
+# Quick reference (rough):
+#   train_rows_per_class: 2000   -> ~4k images,  ~1.5 GB  (pipeline smoke test)
+#   train_rows_per_class: 10000  -> ~20k images, ~6 GB   (course-project sweet spot)
+#   train_rows_per_class: 25000  -> ~50k images, ~16 GB  (strong results)
+#
+# Sizing rationale (see docs/dataset_research.md): the GenImage scaling study
+# shows accuracy saturates around ~16k-20k images (+24 pts from 1.6k to 16k,
+# only +2 pts from 16k to 162k), so 10k per class hits the knee of the curve
+# while keeping the models distinguishable and leaving errors to analyze.
+
+mirror: nebula/GenImage-arrow
+train_generator: stable_diffusion_v_1_4   # SD v1.4 fakes + ImageNet real
+
+# Main train pool: how many real AND fake images to fetch. 0 = skip train fetch.
+train_rows_per_class: 10000
+
+# Fetch the generator's official test subset (usually small, keep True).
+fetch_full_test: true
+
+# Cross-generator sets for the generalization analysis (generator -> rows).
+# Each walks down the test/test split of that generator. ~1k fakes per held-out
+# generator is enough for a meaningful accuracy drop measurement.
+cross_generator_rows:
+  Midjourney: 1000
+  ADM: 1000
+  BigGAN: 1000
+
+# Where the fetched real/ + fake/ folders are written.
+raw_dir: data/raw
+repo_cache: ~/.cache/huggingface
