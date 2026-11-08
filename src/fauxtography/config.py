@@ -174,11 +174,14 @@ def _build(cfg_type: type, raw: dict[str, Any]) -> Any:
 #   FAUXTOGRAPHY_DATA_ROOT      -> cfg.data.root
 #   FAUXTOGRAPHY_RUN_DIR        -> cfg.output.run_dir        (checkpoints/feats)
 #   FAUXTOGRAPHY_RESULTS_DIR    -> cfg.output.results_dir    (committed metrics)
+#   FAUXTOGRAPHY_RAW_DIR        -> cfg.raw_dir               (genimage download)
+#   FAUXTOGRAPHY_HELDOUT_TEST   -> cfg.data.heldout_test     (official test set)
 _PATH_OVERRIDES = {
     "FAUXTOGRAPHY_DATA_ROOT": ("data", "root"),
     "FAUXTOGRAPHY_RUN_DIR": ("output", "run_dir"),
     "FAUXTOGRAPHY_RESULTS_DIR": ("output", "results_dir"),
     "FAUXTOGRAPHY_RAW_DIR": (None, "raw_dir"),
+    "FAUXTOGRAPHY_HELDOUT_TEST": ("data", "heldout_test"),
 }
 
 
