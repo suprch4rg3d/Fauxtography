@@ -199,13 +199,27 @@ def cmd_train_baseline(args: argparse.Namespace) -> int:
                 out / "baseline_best.pt",
             )
 
+    def _save_compressed(path: Path, payload: dict) -> None:
+        """Save a .pt checkpoint plus a gzipped .pt.gz for easy sharing."""
+        torch.save(payload, path)
+        # Small helper: gzip the file on disk so the shared copy is smaller.
+        import gzip
+        import shutil
+
+        gz = path.with_suffix(path.suffix + ".gz")
+        with open(path, "rb") as fsrc, gzip.open(gz, "wb") as fdst:
+            shutil.copyfileobj(fsrc, fdst)
+
     # Restore the best-val weights for final evaluation and reporting.
     if best_state is not None:
         model.load_state_dict(best_state)
         logger.info("restored best-val model (val_acc=%.4f)", best_val_acc)
-    torch.save(
-        {"arch": cfg.arch, "model_state_dict": model.state_dict()},
-        out / "baseline.pt",
+    if best_state is not None:
+        _save_compressed(
+            out / "baseline_best.pt", {"arch": cfg.arch, "model_state_dict": best_state}
+        )
+    _save_compressed(
+        out / "baseline.pt", {"arch": cfg.arch, "model_state_dict": model.state_dict()}
     )
 
     # ---- Evaluation on the internal test split -----------------------------
