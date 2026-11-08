@@ -69,6 +69,43 @@ error-inspection objective. Not chosen as the main dataset.
 subset gives a clean large train/val/test split, and holding out other
 generators as a cross-generator test set provides a genuine analysis extension.
 
+## Cross-generator evaluation (and why it matters for this project)
+
+The real photographs in GenImage are paired with fake images from **eight
+different generators** (Midjourney, Stable Diffusion v1.4/v1.5, ADM, GLIDE,
+Wukong, VQDM, BigGAN). This lets us evaluate a detector in two very different
+ways:
+
+- **Same-generator:** train on Stable Diffusion fakes, test on Stable
+  Diffusion fakes. The GenImage paper reports ~99.9% accuracy here.
+- **Cross-generator:** train on Stable Diffusion fakes, then test on fakes
+  from generators never seen during training (e.g. Midjourney, BigGAN, ADM).
+  The same detector drops to ~72% on average and below ~55% on some
+  individual generators.
+
+Why the accuracy collapses: a detector trained on one generator tends to learn
+that generator's specific artifacts (noise pattern, upsampling signature)
+rather than a general "this is AI-synthesised" concept. When it meets a
+different generator's artifacts, its crutch is gone. This is the paper's
+central finding, and it is a valuable thing for us to reproduce:
+
+- It separates **memorising one generator** from **understanding synthetic
+  imagery**.
+- It gives the manual error inspection a rich set of misclassifications to
+dissect for the analysis and presentation.
+- **CLIP is the interesting wildcard**: it was never trained on any fake
+  images, so it has no single generator's artifacts to latch onto. Seeing
+  whether CLIP generalises more evenly across generators than the fine-tuned
+  ResNet is a genuinely insightful comparison.
+
+Concretely, our plan is to train the baseline ResNet and DINOv2 probe on the
+**Stable Diffusion v1.4** subset, then evaluate twice:
+
+1. **Main test:** the official SD v1.4 test split - the clean in-domain number.
+2. **Cross-generator test:** a few hundred to ~1,000 images each from
+   Midjourney, ADM and BigGAN fakes - measuring how much accuracy drops
+   (with real images held consistent, since the real class stays the same).
+
 ### Lightweight Hugging Face "AI vs Real" datasets
 
 - Several small (1k-10k sample) AI-vs-real classification sets exist on the Hub
