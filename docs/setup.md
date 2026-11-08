@@ -7,6 +7,9 @@ the same runtime environment. Pick one per machine and stick to it.
 **Prerequisite:** Python **3.14** (3.14 is required; the dependency set is
 verified against macOS/arm64 + Python 3.14 + torch 2.15).
 
+> Note: the exact patch **3.14.1** is explicitly excluded - torchvision ships
+> no wheel for it. Use any other 3.14.x (e.g. 3.14.10, as documented here).
+
 ---
 
 ## Option A - Poetry (preferred by the repo author)
