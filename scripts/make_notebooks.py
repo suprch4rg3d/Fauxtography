@@ -490,10 +490,10 @@ print("manual step - see cells above")
 
 def main() -> None:
     write("00_data_overview.ipynb", data_overview())
-    write("analysis_clip.ipynb",
-          model_analysis("clip", "CLIP zero-shot", "Collaborator A"))
-    write("analysis_dinov2.ipynb",
-          model_analysis("dinov2", "DINOv2 + linear probe", "Collaborator B"))
+    write("analysis_clip.ipynb", model_analysis("clip", "CLIP zero-shot", "Collaborator A"))
+    write(
+        "analysis_dinov2.ipynb", model_analysis("dinov2", "DINOv2 + linear probe", "Collaborator B")
+    )
     write("final_report.ipynb", final_report())
     write("fauxtography-on-colab.ipynb", fauxtography_on_colab())
 
