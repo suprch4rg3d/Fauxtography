@@ -295,6 +295,17 @@ GPU. It is *not* the analysis (those live in the other notebooks); it:
 6. copies `results/` + checkpoints to Drive so they survive session
    disconnects
 
+### Running this notebook: one rule to avoid stale edits
+
+If you run this from VS Code's Colab extension, the extension syncs the
+notebook you have open **and** cell 1 clones the repo (a second copy).
+Editing cells while a runtime is attached edits the synced copy, but the
+pipeline runs from the cloned copy - so mid-run edits can appear stale.
+
+**Rule:** edit locally (runtime detached) -> save -> launch the runtime -> run
+straight through without editing cells. A self-check cell after the clone
+warns loudly if the running copy diverges from the repo's version.
+
 Make sure you know where your dataset is BEFORE running (cell for that
 below). Run cells top-to-bottom, in order.
 """
@@ -319,7 +330,53 @@ if not os.path.isdir(repo):
     !git clone --depth 1 https://github.com/suprch4rg3d/fauxtography.git {repo}
 os.chdir(repo)
 print("repo ready at", os.getcwd())
+""",
+        ),
+        md(
+            """\
+### Self-check: is the running copy in sync with the repo?
+
+The pipeline below runs from the clone at `{repo}`. If you edited the notebook
+that the runtime synced here, the cells executing may not match what you see.
+This check compares this notebook's cells to the repo's committed version and
+warns loudly on any divergence.
 """
+        ),
+        code(
+            """\
+import json
+import subprocess
+from pathlib import Path
+
+repo = "/content/fauxtography"
+this = Path("/content/notebooks/fauxtography-on-colab.ipynb")
+if not this.exists():
+    this = Path(repo) / "notebooks" / "fauxtography-on-colab.ipynb"
+
+def _cells(path):
+    try:
+        nb = json.loads(Path(path).read_text())
+    except Exception:
+        return []
+    return [
+        "".join(c["source"])
+        for c in nb["cells"]
+        if c["cell_type"] == "code"
+    ]
+
+# Fetch the repo's committed notebook to compare against (no writes).
+subprocess.run(["git", "fetch", "origin", "main"], cwd=repo, capture_output=True)
+committed = Path(repo) / "notebooks" / "fauxtography-on-colab.ipynb"
+
+here = _cells(this)
+comm = _cells(committed)
+if here and comm and here == comm:
+    print("OK - running notebook matches the repo version.")
+else:
+    print("WARNING: running notebook may be out of sync with the repo.")
+    print("  Cells here: %d, cells in repo: %d" % (len(here), len(comm)))
+    print("  If you edited cells before launching, restart the runtime and re-run.")
+""",
         ),
         md(
             """\
