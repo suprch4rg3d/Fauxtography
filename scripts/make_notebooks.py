@@ -476,11 +476,18 @@ os.chdir(repo)
 RAW_DIR = "/content/drive/MyDrive/fauxtography/data/raw"   # where raw/ goes
 os.environ["FAUXTOGRAPHY_RAW_DIR"] = RAW_DIR
 
-# Skip the download if the training pool already exists in Drive.
-train_real = os.path.join(RAW_DIR, "train", "real")
-if os.path.isdir(train_real) and os.listdir(train_real):
-    print("raw training pool already present - skipping download")
+# Skip the download only if BOTH the training pool and the held-out test
+# are already complete. A partial/empty leaf (e.g. an interrupted download)
+# would otherwise pass the old train-only check and stay broken forever.
+def _has_images(*subs: str) -> bool:
+    p = os.path.join(RAW_DIR, *subs)
+    return os.path.isdir(p) and bool(os.listdir(p))
+
+complete = _has_images("train", "real") and _has_images("train", "fake") and _has_images("test", "real") and _has_images("test", "fake")
+if complete:
+    print("raw train + held-out test already present - skipping download")
 else:
+    print("raw data incomplete - (re)fetching GenImage slice")
     !{venv}/bin/fauxtography fetch-genimage
 print("raw data at:", RAW_DIR)
 """,
