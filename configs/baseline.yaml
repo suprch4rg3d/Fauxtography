@@ -13,6 +13,8 @@ data:
   image_size: 224
   num_workers: 4
   seed: 42
+  # Official held-out GenImage test (real/fake pair); empty = skip extra eval.
+  heldout_test: data/raw/test
 
 output:
   run_dir: experiments/runs

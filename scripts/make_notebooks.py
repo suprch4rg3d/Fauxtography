@@ -295,6 +295,17 @@ GPU. It is *not* the analysis (those live in the other notebooks); it:
 6. copies `results/` + checkpoints to Drive so they survive session
    disconnects
 
+### Running this notebook: one rule to avoid stale edits
+
+If you run this from VS Code's Colab extension, the extension syncs the
+notebook you have open **and** cell 1 clones the repo (a second copy).
+Editing cells while a runtime is attached edits the synced copy, but the
+pipeline runs from the cloned copy - so mid-run edits can appear stale.
+
+**Rule:** edit locally (runtime detached) -> save -> launch the runtime -> run
+straight through without editing cells. A self-check cell after the clone
+warns loudly if the running copy diverges from the repo's version.
+
 Make sure you know where your dataset is BEFORE running (cell for that
 below). Run cells top-to-bottom, in order.
 """
@@ -313,13 +324,64 @@ a Drive copy, mount Drive (cell 2) and ``cd`` into it instead of cloning.
 # Install uv (fast Python env manager that can fetch a 3.14 interpreter)
 !pip install -q uv
 
-repo = "/content/fauxtography"
 import os
-if not os.path.isdir(repo):
+from pathlib import Path
+
+# The repo must be PUBLIC for this clean clone to work (Settings -> General
+# -> change visibility). Default branch is what the runtime fetches - it must
+# be up to date (push/merge to main before running).
+repo = "/content/fauxtography"
+if not Path(repo).is_dir():
     !git clone --depth 1 https://github.com/suprch4rg3d/fauxtography.git {repo}
 os.chdir(repo)
 print("repo ready at", os.getcwd())
+""",
+        ),
+        md(
+            """\
+### Self-check: is the running copy in sync with the repo?
+
+The pipeline below runs from the clone at `{repo}`. If you edited the notebook
+that the runtime synced here, the cells executing may not match what you see.
+This check compares this notebook's cells to the repo's committed version and
+warns loudly on any divergence.
 """
+        ),
+        code(
+            """\
+import json
+import subprocess
+from pathlib import Path
+
+repo = "/content/fauxtography"
+this = Path("/content/notebooks/fauxtography-on-colab.ipynb")
+if not this.exists():
+    this = Path(repo) / "notebooks" / "fauxtography-on-colab.ipynb"
+
+def _cells(path):
+    try:
+        nb = json.loads(Path(path).read_text())
+    except Exception:
+        return []
+    return [
+        "".join(c["source"])
+        for c in nb["cells"]
+        if c["cell_type"] == "code"
+    ]
+
+# Fetch the repo's committed notebook to compare against (no writes).
+subprocess.run(["git", "fetch", "origin", "main"], cwd=repo, capture_output=True)
+committed = Path(repo) / "notebooks" / "fauxtography-on-colab.ipynb"
+
+here = _cells(this)
+comm = _cells(committed)
+if here and comm and here == comm:
+    print("OK - running notebook matches the repo version.")
+else:
+    print("WARNING: running notebook may be out of sync with the repo.")
+    print("  Cells here: %d, cells in repo: %d" % (len(here), len(comm)))
+    print("  If you edited cells before launching, restart the runtime and re-run.")
+""",
         ),
         md(
             """\
@@ -390,23 +452,58 @@ print("configured:", DATA_ROOT)
         ),
         md(
             """\
-## 6. Split the dataset (if not already prepared in Drive)
+## 6. Download the dataset into Drive (run once)
 
-Edit the two source paths below to match your raw image folders, then run.
-Safe to rerun; copies into ``data/`` under your Drive.
+Downloads the GenImage slice configured in `configs/genimage.yaml` straight
+from HuggingFace into Drive - no need to upload gigabytes from your machine.
+Re-running is safe; skip this section if the data is already in Drive.
+
+Output layout (see `docs/dataset_research.md`):
+    <RAW_DIR>/train/{real,fake}          training pool
+    <RAW_DIR>/test/{real,fake}           official held-out test
+    <RAW_DIR>/cross/<gen>/{real,fake}    cross-generator sets
 """
         ),
         code(
             """\
+import os
+venv = "/content/fxt-venv"
+repo = "/content/fauxtography"
+os.chdir(repo)
+
+RAW_DIR = "/content/drive/MyDrive/fauxtography/data/raw"   # where raw/ goes
+os.environ["FAUXTOGRAPHY_RAW_DIR"] = RAW_DIR
+
+# Skip the download if the training pool already exists in Drive.
+train_real = os.path.join(RAW_DIR, "train", "real")
+if os.path.isdir(train_real) and os.listdir(train_real):
+    print("raw training pool already present - skipping download")
+else:
+    !{venv}/bin/fauxtography fetch-genimage
+print("raw data at:", RAW_DIR)
+""",
+        ),
+        md(
+            """\
+## 7. Split the dataset into train/val/test from the downloaded raw pool
+
+Builds `data/train|val|test` from the GenImage SD v1.4 *training pool* only
+(`raw/train`), keeping the official held-out `raw/test` separate for later
+evaluation (train-baseline scores it when `data.heldout_test` is set).
+"""
+        ),
+        code(
+            """\
+# NOTE: splits only raw/train - the official test stays untouched.
 !/content/fxt-venv/bin/fauxtography prepare-data \\
-    --source-real /content/drive/MyDrive/fauxtography/data/_raw/real \\
-    --source-fake /content/drive/MyDrive/fauxtography/data/_raw/fake \\
+    --source-real /content/drive/MyDrive/fauxtography/data/raw/train/real \\
+    --source-fake /content/drive/MyDrive/fauxtography/data/raw/train/fake \\
     --data-root /content/drive/MyDrive/fauxtography/data
 """,
         ),
         md(
             """\
-## 7. Training / evaluation (GPU steps - run one at a time)
+## 8. Training / evaluation (GPU steps - run one at a time)
 
 The three model commands are heavy; run them in separate cells so a disconnect
 can't lose more than one step. Each reads its own config and writes results to
@@ -421,20 +518,24 @@ Drive via the env vars above.
         ),
         code(
             """\
-# CLIP zero-shot - Collaborator A
-!/content/fxt-venv/bin/fauxtography eval-clip
+# CLIP zero-shot - Collaborator A. NOT IMPLEMENTED YET.
+# Uncomment (remove the leading #) once eval-clip is implemented.
+# !/content/fxt-venv/bin/fauxtography eval-clip
+print("SKIPPED: CLIP eval-clip not implemented yet (see docs/milestones).")
 """,
         ),
         code(
             """\
-# DINOv2 - extract features then train the linear probe (Collaborator B)
-!/content/fxt-venv/bin/fauxtography extract-dinov2
-!/content/fxt-venv/bin/fauxtography train-linear-probe
+# DINOv2 - extract features then train the linear probe - Collaborator B.
+# NOT IMPLEMENTED YET. Uncomment once the milestone lands.
+# !/content/fxt-venv/bin/fauxtography extract-dinov2
+# !/content/fxt-venv/bin/fauxtography train-linear-probe
+print("SKIPPED: DINOv2 (extract-dinov2 / train-linear-probe) not implemented yet.")
 """,
         ),
         md(
             """\
-## 8. Backup sanity
+## 9. Backup sanity
 
 Confirm the outputs actually landed on Drive (they survive session drops).
 Then open `00_data_overview.ipynb` and the model analysis notebooks to
@@ -449,7 +550,7 @@ inspect the results and write the verdicts.
         ),
         md(
             """\
-## 9. Publish results to git
+## 10. Publish results to git
 
 Colab runs on your branch - these cells copy the results from Drive into the
 repo and **stage only `results/`** (the small committed artifacts: json, svg,
@@ -490,10 +591,10 @@ print("manual step - see cells above")
 
 def main() -> None:
     write("00_data_overview.ipynb", data_overview())
-    write("analysis_clip.ipynb",
-          model_analysis("clip", "CLIP zero-shot", "Collaborator A"))
-    write("analysis_dinov2.ipynb",
-          model_analysis("dinov2", "DINOv2 + linear probe", "Collaborator B"))
+    write("analysis_clip.ipynb", model_analysis("clip", "CLIP zero-shot", "Collaborator A"))
+    write(
+        "analysis_dinov2.ipynb", model_analysis("dinov2", "DINOv2 + linear probe", "Collaborator B")
+    )
     write("final_report.ipynb", final_report())
     write("fauxtography-on-colab.ipynb", fauxtography_on_colab())
 
