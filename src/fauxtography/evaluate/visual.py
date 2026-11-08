@@ -6,7 +6,13 @@ gallery; the compare step produces the side-by-side figure).
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
+
+# Force the non-interactive Agg backend so headless runs (Colab, CI) work even
+# when an inherited MPLBACKEND (e.g. Colab's matplotlib_inline, which isn't in
+# the project venv) would otherwise break matplotlib at import time.
+os.environ["MPLBACKEND"] = "Agg"
 
 import matplotlib.pyplot as plt
 import numpy as np
