@@ -9,9 +9,15 @@ that ``prepare-data`` expects, fetching **by row count** (not raw GB) so the
 amount of data is decided by image count - the quantity that actually drives
 training cost and accuracy.
 
+Lay-down keeps the official test separate from the training pool:
+
+    data/raw/train/{real,fake}           training pool (fed to prepare-data)
+    data/raw/test/{real,fake}            official held-out test
+    data/raw/cross/<generator>/{real,fake}   cross-generator analysis sets
+
 Ownership/notes:
 - ``train_rows_per_class`` + the generator determine the main train pool.
-- ``fetch_full_test`` grabs the generator's official test subset.
+- ``fetch_full_test`` grabs the generator's official test subset (held out).
 - ``cross_generator_rows`` pulls small sets from other generators for the
   cross-generator generalisation analysis.
 """
@@ -121,29 +127,46 @@ def fetch_genimage(cfg) -> dict:
         chosen = shards if n_files is None else shards[:n_files]
         return [resolve(f) for f in chosen]
 
+    # Layout: separate training pool, official test, and cross-generator sets
+    # so prepare-data consumes only the train pool and the test stays held out.
+    #   data/raw/train/{real,fake}
+    #   data/raw/test/{real,fake}
+    #   data/raw/cross/<generator>/{real,fake}
     if rows > 0:
         n_shards = _shards_needed(rows)
         paths = take(f"data/train/{gen}", n_shards)
         logger.info("fetching %d rows/class of %s train (shards %d)", rows, gen, n_shards)
         ds = load_dataset("arrow", data_files=paths, split="train")
-        counts = _stream_split(ds, rows, raw / "real", raw / "fake")
+        counts = _stream_split(ds, rows, raw / "train" / "real", raw / "train" / "fake")
         logger.info("train %s: %s", gen, counts)
         report["train"] = counts
 
     if cfg.fetch_full_test:
         paths = take(f"data/test/{gen}", None)
         ds = load_dataset("arrow", data_files=paths, split="train")
-        counts = _stream_split(ds, 50_000, raw / "real", raw / "fake")
+        counts = _stream_split(ds, 50_000, raw / "test" / "real", raw / "test" / "fake")
         logger.info("test %s: %s", gen, counts)
         report["test"] = counts
 
     for g, g_rows in (cfg.cross_generator_rows or {}).items():
         if g_rows <= 0:
             continue
-        paths = take(f"data/test/{g}", 1)  # enough for small cross-gene sets
-        ds = load_dataset("arrow", data_files=paths, split="train")
-        counts = _stream_split(ds, g_rows, raw / "real", raw / "fake")
-        logger.info("cross %s: %s", g, counts)
+        # The mirror orders each test leaf real-first, with fakes only in
+        # later shards, so walk shards until the requested fakes are covered.
+        shards = _leaf_shards(files, f"data/test/{g}")
+        if not shards:
+            raise FileNotFoundError(f"no shards on the mirror for data/test/{g!r}")
+        acc_paths: list[str] = []
+        counts: dict[str, int] = {}
+        for sh in shards:
+            acc_paths.append(resolve(sh))
+            ds = load_dataset("arrow", data_files=acc_paths, split="train")
+            counts = _stream_split(
+                ds, g_rows, raw / "cross" / g / "real", raw / "cross" / g / "fake"
+            )
+            if counts.get("fake", 0) >= g_rows or len(acc_paths) >= len(shards):
+                break
+        logger.info("cross %s (used %d/%d shards): %s", g, len(acc_paths), len(shards), counts)
         report[f"cross_{g}"] = counts
 
     return report
