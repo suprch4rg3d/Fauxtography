@@ -1,4 +1,4 @@
-"""STUB - Linear probe trained on extracted DINOv2 features.
+"""Linear probe trained on extracted DINOv2 features.
 
 Ownership: DINOv2 collaborator.
 API contract:
@@ -15,8 +15,9 @@ class LinearProbe(nn.Module):
     """A single linear classifier on top of frozen features."""
 
     def __init__(self, in_features: int, num_classes: int = 2) -> None:
-        """TODO(impl): single `nn.Linear(in_features, num_classes)` head."""
-        raise NotImplementedError("Implement in the DINOv2 milestone (see docs).")
+        super().__init__()
+        self.head = nn.Linear(in_features, num_classes)
 
     def forward(self, features: torch.Tensor) -> torch.Tensor:
-        raise NotImplementedError("Implement in the DINOv2 milestone (see docs).")
+        """features (B, embed_dim) -> (B, num_classes) logits."""
+        return self.head(features)

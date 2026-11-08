@@ -64,5 +64,10 @@ def clip_transforms(image_size: int = 224) -> ModelTransforms:
 
 
 def dinov2_transforms(image_size: int = 224) -> ModelTransforms:
-    """TODO(impl): DINOv2 resize + ImageNet normalization."""
-    raise NotImplementedError
+    """DINOv2 pipeline: square resize + ImageNet normalization.
+
+    Features are extracted from a frozen backbone, so train and eval use the
+    same pipeline (no augmentation that would shift the feature geometry).
+    """
+    eval_tf = _resize_eval(image_size)
+    return ModelTransforms(train_transform=eval_tf, eval_transform=eval_tf)
