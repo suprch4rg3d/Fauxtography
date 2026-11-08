@@ -327,32 +327,12 @@ a Drive copy, mount Drive (cell 2) and ``cd`` into it instead of cloning.
 import os
 from pathlib import Path
 
+# The repo must be PUBLIC for this clean clone to work (Settings -> General
+# -> change visibility). Default branch is what the runtime fetches - it must
+# be up to date (push/merge to main before running).
 repo = "/content/fauxtography"
-
-if Path(repo).is_dir():
-    print("Using existing clone at", repo)
-else:
-    # For a PRIVATE repo the runtime needs auth. Set a GitHub PAT named
-    # GITHUB_TOKEN in Colab Secrets (key icon in the left sidebar), or this
-    # cell will fall back to an unauthenticated clone (works for public repos).
-    clone_url = "https://github.com/suprch4rg3d/fauxtography.git"
-    try:
-        from google.colab import userdata
-
-        token = userdata.get("GITHUB_TOKEN")
-        if token:
-            clone_url = f"https://x-access-token:{token}@github.com/suprch4rg3d/fauxtography.git"
-            print("using GITHUB_TOKEN from Colab secrets for private clone")
-    except Exception:
-        pass
-
-    result = !git clone --depth 1 {clone_url} {repo}
-    if not Path(repo).is_dir():
-        raise RuntimeError(
-            "git clone failed - the repo is private and no GITHUB_TOKEN secret was set. "
-            "Add a Personal Access Token as GITHUB_TOKEN in Colab Secrets (left "
-            "sidebar key icon), or make the repo public, then re-run this cell.")
-
+if not Path(repo).is_dir():
+    !git clone --depth 1 https://github.com/suprch4rg3d/fauxtography.git {repo}
 os.chdir(repo)
 print("repo ready at", os.getcwd())
 """,
@@ -555,7 +535,7 @@ print("SKIPPED: DINOv2 (extract-dinov2 / train-linear-probe) not implemented yet
         ),
         md(
             """\
-## 8. Backup sanity
+## 9. Backup sanity
 
 Confirm the outputs actually landed on Drive (they survive session drops).
 Then open `00_data_overview.ipynb` and the model analysis notebooks to
@@ -570,7 +550,7 @@ inspect the results and write the verdicts.
         ),
         md(
             """\
-## 9. Publish results to git
+## 10. Publish results to git
 
 Colab runs on your branch - these cells copy the results from Drive into the
 repo and **stage only `results/`** (the small committed artifacts: json, svg,
