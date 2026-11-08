@@ -24,6 +24,9 @@ class DataConfig:
     image_size: int = 224
     num_workers: int = 4
     seed: int = 42
+    # Optional official held-out test set (real/fake folder pair), e.g.
+    # "data/raw/test" when using GenImage. Empty = skip extra eval.
+    heldout_test: str = ""
 
 
 @dataclass
