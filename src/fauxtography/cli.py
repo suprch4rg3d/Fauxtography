@@ -160,6 +160,12 @@ def cmd_train_baseline(args: argparse.Namespace) -> int:
             total += labels.size(0)
         return running / total, correct / total
 
+    # ---- Training: per-epoch + best-val checkpoints, restore best at end ----
+    out = Path(cfg.output.run_dir) / cfg.name
+    out.mkdir(parents=True, exist_ok=True)
+    best_val_acc = 0.0
+    best_state = None
+
     logger.info(
         "Baseline %s on %s (%s)",
         cfg.arch,
@@ -178,42 +184,114 @@ def cmd_train_baseline(args: argparse.Namespace) -> int:
             val_loss,
             val_acc,
         )
+        # Per-epoch checkpoint (keeps the most recent, so a Colab disconnect
+        # loses at most one epoch of progress).
+        torch.save(
+            {"arch": cfg.arch, "model_state_dict": model.state_dict(), "epoch": epoch},
+            out / "baseline_latest.pt",
+        )
+        # Track the best validation model and keep its weights.
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            best_state = {k: v.clone() for k, v in model.state_dict().items()}
+            torch.save(
+                {"arch": cfg.arch, "model_state_dict": best_state, "epoch": epoch},
+                out / "baseline_best.pt",
+            )
 
-    # Test-set evaluation + artifacts
-    model.eval()
-    y_true, y_pred = [], []
-    with torch.no_grad():
-        for images, labels in loaders["test"]:
-            images = images.to(device)
-            logits = model(images)
-            y_true.extend(labels.tolist())
-            y_pred.extend(logits.argmax(1).cpu().tolist())
+    def _save_compressed(path: Path, payload: dict) -> None:
+        """Save a .pt checkpoint plus a gzipped .pt.gz for easy sharing."""
+        torch.save(payload, path)
+        # Small helper: gzip the file on disk so the shared copy is smaller.
+        import gzip
+        import shutil
 
-    metrics = evaluate_predictions(y_true, y_pred)
-    report = classification_report(y_true, y_pred)
-    cm = confusion_matrix_data(y_true, y_pred)
+        gz = path.with_suffix(path.suffix + ".gz")
+        with open(path, "rb") as fsrc, gzip.open(gz, "wb") as fdst:
+            shutil.copyfileobj(fsrc, fdst)
 
-    out = Path(cfg.output.run_dir) / cfg.name
-    out.mkdir(parents=True, exist_ok=True)
-    torch.save(
-        {"arch": cfg.arch, "model_state_dict": model.state_dict()},
-        out / "baseline.pt",
+    # Restore the best-val weights for final evaluation and reporting.
+    if best_state is not None:
+        model.load_state_dict(best_state)
+        logger.info("restored best-val model (val_acc=%.4f)", best_val_acc)
+    if best_state is not None:
+        _save_compressed(
+            out / "baseline_best.pt", {"arch": cfg.arch, "model_state_dict": best_state}
+        )
+    _save_compressed(
+        out / "baseline.pt", {"arch": cfg.arch, "model_state_dict": model.state_dict()}
     )
+
+    # ---- Evaluation on the internal test split -----------------------------
+    def _predict(loader):
+        model.eval()
+        yt, yp = [], []
+        with torch.no_grad():
+            for images, labels in loader:
+                images = images.to(device)
+                logits = model(images)
+                yt.extend(labels.tolist())
+                yp.extend(logits.argmax(1).cpu().tolist())
+        return np.asarray(yt), np.asarray(yp)
+
+    import numpy as np
 
     results_dir = Path(cfg.output.results_dir) / cfg.name
     results_dir.mkdir(parents=True, exist_ok=True)
+
+    y_true, y_pred = _predict(loaders["test"])
+    metrics = evaluate_predictions(y_true, y_pred)
+    report = classification_report(y_true, y_pred)
+    cm = confusion_matrix_data(y_true, y_pred)
     (results_dir / "metrics.json").write_text(
         json.dumps({"accuracy": metrics["accuracy"], "classification_report": report}, indent=2)
     )
-    import numpy as np
-
-    np.save(results_dir / "y_true.npy", np.asarray(y_true))
-    np.save(results_dir / "y_pred.npy", np.asarray(y_pred))
+    np.save(results_dir / "y_true.npy", y_true)
+    np.save(results_dir / "y_pred.npy", y_pred)
     plot_confusion_matrix(
-        cm, results_dir / "confusion_matrix.svg", title=f"{cfg.name} confusion matrix"
+        cm, results_dir / "confusion_matrix.svg", title=f"{cfg.name} - internal split"
     )
+    logger.info("internal test accuracy=%.4f -> %s", metrics["accuracy"], results_dir)
 
-    logger.info("test accuracy=%.4f -> %s", metrics["accuracy"], results_dir)
+    # ---- Optional evaluation on the official held-out test ----------------
+    heldout = cfg.data.heldout_test
+    if heldout:
+        heldout_root = Path(heldout)
+        ds = FauxtoDataset(heldout_root, transform=tf.eval_transform)
+        heldout_loader = DataLoader(
+            ds,
+            batch_size=cfg.batch_size,
+            num_workers=cfg.data.num_workers,
+            pin_memory=device.type == "cuda",
+        )
+        hy_true, hy_pred = _predict(heldout_loader)
+        h_metrics = evaluate_predictions(hy_true, hy_pred)
+        h_report = classification_report(hy_true, hy_pred)
+        h_cm = confusion_matrix_data(hy_true, hy_pred)
+        (results_dir / "heldout_metrics.json").write_text(
+            json.dumps(
+                {
+                    "accuracy": h_metrics["accuracy"],
+                    "n_samples": h_metrics["n_samples"],
+                    "classification_report": h_report,
+                },
+                indent=2,
+            )
+        )
+        np.save(results_dir / "heldout_y_true.npy", hy_true)
+        np.save(results_dir / "heldout_y_pred.npy", hy_pred)
+        plot_confusion_matrix(
+            h_cm,
+            results_dir / "heldout_confusion_matrix.svg",
+            title=f"{cfg.name} - official held-out test",
+        )
+        logger.info(
+            "held-out test accuracy=%.4f (n=%d) -> %s",
+            h_metrics["accuracy"],
+            h_metrics["n_samples"],
+            results_dir,
+        )
+
     return 0
 
 

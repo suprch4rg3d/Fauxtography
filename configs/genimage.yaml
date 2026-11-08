@@ -15,7 +15,7 @@
 # while keeping the models distinguishable and leaving errors to analyze.
 
 mirror: nebula/GenImage-arrow
-train_generator: stable_diffusion_v_1_4   # SD v1.4 fakes + ImageNet real
+train_generator: stable_diffusion_v_1_4 # SD v1.4 fakes + ImageNet real
 
 # Main train pool: how many real AND fake images to fetch. 0 = skip train fetch.
 train_rows_per_class: 10000
@@ -31,6 +31,9 @@ cross_generator_rows:
   ADM: 1000
   BigGAN: 1000
 
-# Where the fetched real/ + fake/ folders are written.
+# Where the fetched data is written:
+#   <raw_dir>/train/{real,fake}          training pool (for prepare-data)
+#   <raw_dir>/test/{real,fake}           official held-out test
+#   <raw_dir>/cross/<gen>/{real,fake}    cross-generator analysis sets
 raw_dir: data/raw
 repo_cache: ~/.cache/huggingface

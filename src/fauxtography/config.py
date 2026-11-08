@@ -24,6 +24,9 @@ class DataConfig:
     image_size: int = 224
     num_workers: int = 4
     seed: int = 42
+    # Optional official held-out test set (real/fake folder pair), e.g.
+    # "data/raw/test" when using GenImage. Empty = skip extra eval.
+    heldout_test: str = ""
 
 
 @dataclass
@@ -175,6 +178,7 @@ _PATH_OVERRIDES = {
     "FAUXTOGRAPHY_DATA_ROOT": ("data", "root"),
     "FAUXTOGRAPHY_RUN_DIR": ("output", "run_dir"),
     "FAUXTOGRAPHY_RESULTS_DIR": ("output", "results_dir"),
+    "FAUXTOGRAPHY_RAW_DIR": (None, "raw_dir"),
 }
 
 
@@ -183,8 +187,8 @@ def _apply_path_overrides(cfg: Any) -> Any:
         val = os.environ.get(env_var)
         if not val:
             continue
-        outer_obj = getattr(cfg, outer, None)
-        if outer_obj is None:
+        target = cfg if outer is None else getattr(cfg, outer, None)
+        if target is None or not hasattr(target, inner):
             continue
-        setattr(outer_obj, inner, val)
+        setattr(target, inner, val)
     return cfg
