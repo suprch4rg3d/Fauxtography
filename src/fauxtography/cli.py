@@ -304,19 +304,200 @@ def cmd_eval_clip(args: argparse.Namespace) -> int:
 
 
 def cmd_extract_dinov2(args: argparse.Namespace) -> int:
-    from .config import load_config
+    """Cache frozen DINOv2 [CLS] features for train/val/test (+ heldout)."""
+    import json
 
-    load_config("dinov2", args.config)  # validate+warm the config at call time
-    logger.info("TODO: implement DINOv2 feature extraction (config=%s)", args.config)
-    raise NotImplementedError("DINOv2 milestone - see docs/milestones.")
+    import torch
+    from torch.utils.data import DataLoader
+
+    from .config import load_config
+    from .data.dataset import FauxtoDataset, get_datasets
+    from .data.transforms import dinov2_transforms
+    from .models.dinov2 import DINOv2FeatureExtractor
+    from .utils.device import get_device
+    from .utils.seed import set_seed
+
+    cfg = load_config("dinov2", args.config)
+    set_seed(cfg.data.seed)
+    device = get_device()
+
+    tf = dinov2_transforms(cfg.data.image_size)
+    splits = get_datasets(cfg.data, tf.train_transform, tf.eval_transform)
+
+    heldout_root = cfg.data.heldout_test
+    if heldout_root:
+        splits["heldout"] = FauxtoDataset(Path(heldout_root), transform=tf.eval_transform)
+
+    extractor = DINOv2FeatureExtractor(arch=cfg.arch, device=device)
+    logger.info(
+        "extracting with %s on %s (%d-dim features)",
+        cfg.arch,
+        device,
+        extractor.hidden_size,
+    )
+
+    out = Path(cfg.output.run_dir) / "dinov2" / "features"
+    out.mkdir(parents=True, exist_ok=True)
+
+    cache_path = out / "metadata.json"
+    with open(cache_path, "w") as fh:
+        json.dump(
+            {
+                "arch": cfg.arch,
+                "image_size": cfg.data.image_size,
+                "pretrained": True,
+                "note": "frozen DINOv2 [CLS] features; per-split .pt files next to this",
+            },
+            fh,
+            indent=2,
+        )
+
+    for split, ds in splits.items():
+        feats_path = out / f"{split}.pt"
+        if feats_path.exists():
+            logger.info("skip %s - features already cached (%s)", split, feats_path)
+            continue
+        loader = DataLoader(
+            ds,
+            batch_size=cfg.feature_batch_size,
+            shuffle=False,
+            num_workers=cfg.num_workers,
+            pin_memory=device.type == "cuda",
+        )
+        feats, labels = [], []
+        for images, _labels in loader:
+            feats.append(extractor.extract(images).cpu())
+            labels.append(_labels)
+        torch.save(
+            {"features": torch.cat(feats), "labels": torch.cat(labels)},
+            feats_path,
+        )
+        logger.info("cached %s features (%d x %d)", split, len(ds), extractor.hidden_size)
+    logger.info("features under %s", out)
+    return 0
 
 
 def cmd_train_linear_probe(args: argparse.Namespace) -> int:
-    from .config import load_config
+    """Train a linear head on cached DINOv2 features and write metrics."""
+    import json
 
-    load_config("dinov2", args.config)  # validate+warm the config at call time
-    logger.info("TODO: implement linear probe training (config=%s)", args.config)
-    raise NotImplementedError("DINOv2 milestone - see docs/milestones.")
+    import numpy as np
+    import torch
+    from torch import nn
+    from torch.utils.data import DataLoader, TensorDataset
+
+    from .config import load_config
+    from .evaluate.metrics import classification_report, confusion_matrix_data, evaluate_predictions
+    from .evaluate.visual import plot_confusion_matrix
+    from .models.linear_probe import LinearProbe
+    from .utils.device import get_device
+    from .utils.seed import set_seed
+
+    cfg = load_config("dinov2", args.config)
+    set_seed(cfg.data.seed)
+    device = get_device()
+
+    feats_dir = Path(cfg.output.run_dir) / "dinov2" / "features"
+
+    def _load(split: str):
+        path = feats_dir / f"{split}.pt"
+        if not path.exists():
+            raise FileNotFoundError(f"no cached features at {path} - run extract-dinov2 first")
+        data = torch.load(path, map_location="cpu", weights_only=True)
+        return data["features"], data["labels"].long()
+
+    train_x, train_y = _load("train")
+    val_x, val_y = _load("val")
+
+    probe = LinearProbe(train_x.shape[1], num_classes=2).to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.AdamW(
+        probe.parameters(), lr=cfg.probe_lr, weight_decay=cfg.probe_weight_decay
+    )
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=cfg.probe_epochs)
+
+    train_loader = DataLoader(
+        TensorDataset(train_x, train_y),
+        batch_size=cfg.probe_batch_size,
+        shuffle=True,
+    )
+    val_loader = DataLoader(TensorDataset(val_x, val_y), batch_size=cfg.probe_batch_size)
+
+    best_val_acc, best_state = 0.0, None
+    for epoch in range(1, cfg.probe_epochs + 1):
+        probe.train()
+        total = correct = 0
+        for feats, labels in train_loader:
+            feats, labels = feats.to(device), labels.to(device)
+            optimizer.zero_grad()
+            loss = criterion(probe(feats), labels)
+            loss.backward()
+            optimizer.step()
+            correct += (probe(feats).argmax(1) == labels).sum().item()
+            total += labels.size(0)
+        scheduler.step()
+
+        probe.eval()
+        with torch.no_grad():
+            v_correct = sum(
+                (probe(f.to(device)).argmax(1) == l.to(device)).sum().item() for f, l in val_loader
+            )
+        val_acc = v_correct / len(val_x)
+        logger.info(
+            "probe epoch=%d train_acc=%.4f val_acc=%.4f",
+            epoch,
+            correct / total,
+            val_acc,
+        )
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            best_state = {k: v.clone() for k, v in probe.state_dict().items()}
+
+    if best_state is not None:
+        probe.load_state_dict(best_state)
+        logger.info("restored best-val probe (val_acc=%.4f)", best_val_acc)
+
+    probe_path = Path(cfg.output.run_dir) / "dinov2" / "probe.pt"
+    probe_path.parent.mkdir(parents=True, exist_ok=True)
+    torch.save({"probe_state_dict": probe.state_dict()}, probe_path)
+    logger.info("saved probe -> %s", probe_path)
+
+    def _evaluate(split: str, title: str, prefix: str):
+        """Evaluate cached features for a split; ``prefix`` is "" (internal
+        test) or "heldout_" (official held-out test) to mirror baseline."""
+        x, y = _load(split)
+        probe.eval()
+        with torch.no_grad():
+            logits = probe(x.to(device))
+        y_true, y_pred = y.numpy(), logits.argmax(1).cpu().numpy()
+        metrics = evaluate_predictions(y_true, y_pred)
+        report = classification_report(y_true, y_pred)
+        cm = confusion_matrix_data(y_true, y_pred)
+        np.save(results_dir / f"{prefix}y_true.npy", y_true)
+        np.save(results_dir / f"{prefix}y_pred.npy", y_pred)
+        (results_dir / f"{prefix}metrics.json").write_text(
+            json.dumps(
+                {
+                    "accuracy": metrics["accuracy"],
+                    "n_samples": int(metrics["n_samples"]),
+                    "classification_report": report,
+                },
+                indent=2,
+            )
+        )
+        plot_confusion_matrix(cm, results_dir / f"{prefix}confusion_matrix.svg", title=title)
+        logger.info("%s accuracy=%.4f -> %s", title, metrics["accuracy"], results_dir)
+        return metrics
+
+    results_dir = Path(cfg.output.results_dir) / "dinov2"
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    _evaluate("test", "DINOv2 - internal split", "")
+    if Path(feats_dir / "heldout.pt").exists():
+        _evaluate("heldout", "DINOv2 - held-out test", "heldout_")
+    else:
+        logger.warning("no heldout features cached - skipping held-out eval")
+    return 0
 
 
 def cmd_compare(args: argparse.Namespace) -> int:

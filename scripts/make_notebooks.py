@@ -529,10 +529,8 @@ print("SKIPPED: CLIP eval-clip not implemented yet (see docs/milestones).")
         code(
             """\
 # DINOv2 - extract features then train the linear probe - suprch4rg3d.
-# NOT IMPLEMENTED YET. Uncomment once the milestone lands.
-# !/content/fxt-venv/bin/fauxtography extract-dinov2
-# !/content/fxt-venv/bin/fauxtography train-linear-probe
-print("SKIPPED: DINOv2 (extract-dinov2 / train-linear-probe) not implemented yet.")
+!/content/fxt-venv/bin/fauxtography extract-dinov2
+!/content/fxt-venv/bin/fauxtography train-linear-probe
 """,
         ),
         md(
