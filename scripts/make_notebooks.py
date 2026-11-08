@@ -472,23 +472,58 @@ print("configured:", DATA_ROOT)
         ),
         md(
             """\
-## 6. Split the dataset (if not already prepared in Drive)
+## 6. Download the dataset into Drive (run once)
 
-Edit the two source paths below to match your raw image folders, then run.
-Safe to rerun; copies into ``data/`` under your Drive.
+Downloads the GenImage slice configured in `configs/genimage.yaml` straight
+from HuggingFace into Drive - no need to upload gigabytes from your machine.
+Re-running is safe; skip this section if the data is already in Drive.
+
+Output layout (see `docs/dataset_research.md`):
+    <RAW_DIR>/train/{real,fake}          training pool
+    <RAW_DIR>/test/{real,fake}           official held-out test
+    <RAW_DIR>/cross/<gen>/{real,fake}    cross-generator sets
 """
         ),
         code(
             """\
+import os
+venv = "/content/fxt-venv"
+repo = "/content/fauxtography"
+os.chdir(repo)
+
+RAW_DIR = "/content/drive/MyDrive/fauxtography/data/raw"   # where raw/ goes
+os.environ["FAUXTOGRAPHY_RAW_DIR"] = RAW_DIR
+
+# Skip the download if the training pool already exists in Drive.
+train_real = os.path.join(RAW_DIR, "train", "real")
+if os.path.isdir(train_real) and os.listdir(train_real):
+    print("raw training pool already present - skipping download")
+else:
+    !{venv}/bin/fauxtography fetch-genimage
+print("raw data at:", RAW_DIR)
+""",
+        ),
+        md(
+            """\
+## 7. Split the dataset into train/val/test from the downloaded raw pool
+
+Builds `data/train|val|test` from the GenImage SD v1.4 *training pool* only
+(`raw/train`), keeping the official held-out `raw/test` separate for later
+evaluation (train-baseline scores it when `data.heldout_test` is set).
+"""
+        ),
+        code(
+            """\
+# NOTE: splits only raw/train - the official test stays untouched.
 !/content/fxt-venv/bin/fauxtography prepare-data \\
-    --source-real /content/drive/MyDrive/fauxtography/data/_raw/real \\
-    --source-fake /content/drive/MyDrive/fauxtography/data/_raw/fake \\
+    --source-real /content/drive/MyDrive/fauxtography/data/raw/train/real \\
+    --source-fake /content/drive/MyDrive/fauxtography/data/raw/train/fake \\
     --data-root /content/drive/MyDrive/fauxtography/data
 """,
         ),
         md(
             """\
-## 7. Training / evaluation (GPU steps - run one at a time)
+## 8. Training / evaluation (GPU steps - run one at a time)
 
 The three model commands are heavy; run them in separate cells so a disconnect
 can't lose more than one step. Each reads its own config and writes results to
