@@ -18,6 +18,21 @@ def test_path_override_env_vars(monkeypatch):
         assert cfg.output.results_dir == "/content/exp/results"
 
 
+def test_heldout_test_env_override(monkeypatch):
+    monkeypatch.setenv(
+        "FAUXTOGRAPHY_HELDOUT_TEST", "/content/drive/MyDrive/fauxtography/data/raw/test"
+    )
+    for name in ("baseline", "clip", "dinov2"):
+        cfg = load_config(name)
+        assert cfg.data.heldout_test == "/content/drive/MyDrive/fauxtography/data/raw/test"
+
+
+def test_heldout_test_absent_env_uses_yaml(monkeypatch):
+    monkeypatch.delenv("FAUXTOGRAPHY_HELDOUT_TEST", raising=False)
+    cfg = load_config("baseline")
+    assert cfg.data.heldout_test == "data/raw/test"  # from configs/baseline.yaml
+
+
 def test_path_override_absent_env_vars(monkeypatch):
     monkeypatch.delenv("FAUXTOGRAPHY_DATA_ROOT", raising=False)
     cfg = load_config("baseline")
