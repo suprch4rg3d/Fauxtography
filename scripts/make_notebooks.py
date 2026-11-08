@@ -538,15 +538,19 @@ Drive via the env vars above.
         ),
         code(
             """\
-# CLIP zero-shot - Collaborator A
-!/content/fxt-venv/bin/fauxtography eval-clip
+# CLIP zero-shot - Collaborator A. NOT IMPLEMENTED YET.
+# Uncomment (remove the leading #) once eval-clip is implemented.
+# !/content/fxt-venv/bin/fauxtography eval-clip
+print("SKIPPED: CLIP eval-clip not implemented yet (see docs/milestones).")
 """,
         ),
         code(
             """\
-# DINOv2 - extract features then train the linear probe (Collaborator B)
-!/content/fxt-venv/bin/fauxtography extract-dinov2
-!/content/fxt-venv/bin/fauxtography train-linear-probe
+# DINOv2 - extract features then train the linear probe - Collaborator B.
+# NOT IMPLEMENTED YET. Uncomment once the milestone lands.
+# !/content/fxt-venv/bin/fauxtography extract-dinov2
+# !/content/fxt-venv/bin/fauxtography train-linear-probe
+print("SKIPPED: DINOv2 (extract-dinov2 / train-linear-probe) not implemented yet.")
 """,
         ),
         md(
