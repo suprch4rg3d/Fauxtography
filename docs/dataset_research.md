@@ -69,6 +69,15 @@ error-inspection objective. Not chosen as the main dataset.
 subset gives a clean large train/val/test split, and holding out other
 generators as a cross-generator test set provides a genuine analysis extension.
 
+### Lightweight Hugging Face "AI vs Real" datasets
+
+- Several small (1k-10k sample) AI-vs-real classification sets exist on the Hub
+  with MIT/CC-BY licenses.
+- Fine for a demo or a smoke test, too small for a course project that needs
+  enough data to train a baseline and produce robust confusion matrices.
+
+**Assessment:** not chosen.
+
 ## Cross-generator evaluation (and why it matters for this project)
 
 The real photographs in GenImage are paired with fake images from **eight
@@ -83,11 +92,33 @@ ways:
   The same detector drops to ~72% on average and below ~55% on some
   individual generators.
 
-Why the accuracy collapses: a detector trained on one generator tends to learn
-that generator's specific artifacts (noise pattern, upsampling signature)
-rather than a general "this is AI-synthesised" concept. When it meets a
-different generator's artifacts, its crutch is gone. This is the paper's
-central finding, and it is a valuable thing for us to reproduce:
+### The same-generator vs cross-generator numbers (GenImage paper, ResNet-50)
+
+Row = generator the detector was trained on, column = generator it is tested
+on. The diagonal (same generator) is near-ceiling; everything else collapses.
+
+| Trained / Tested | SD v1.4 | Midjourney | ADM    | BigGAN | VQDM   |
+|------------------|---------|------------|--------|--------|--------|
+| **SD v1.4**      | 99.9%   | 54.9%      | 53.5%  | 52.0%  | 56.6%  |
+| **Midjourney**   | 76.4%   | 98.8%      | 64.1%  | 50.1%  | 52.5%  |
+| **ADM**          | 53.1%   | 58.6%      | 99.0%  | 88.3%  | 61.5%  |
+| **BigGAN**       | 49.9%   | 49.9%      | 50.6%  | 99.9%  | 50.6%  |
+
+For reference, a detector trained on SD v1.4 and tested across all eight
+generators averages ~72% (SD v1.5 / Wukong generalise better, Midjourney and
+VQDM worst).
+
+### Why the accuracy collapses (and an analogy)
+
+A detector trained on one generator tends to learn that generator's specific
+artifacts (noise pattern, upsampling signature) rather than a general
+"this is AI-synthesised" concept. When it meets a different generator's
+artifacts, its pedestal is gone. **Analogy: you learn to spot one artist's
+forgeries by memorising their brushstroke - you nail that artist's fakes but
+miss a different artist's forgeries, even though both are forgeries.**
+
+This is the paper's central finding, and it is a valuable thing for us to
+reproduce:
 
 - It separates **memorising one generator** from **understanding synthetic
   imagery**.
@@ -106,14 +137,7 @@ Concretely, our plan is to train the baseline ResNet and DINOv2 probe on the
    Midjourney, ADM and BigGAN fakes - measuring how much accuracy drops
    (with real images held consistent, since the real class stays the same).
 
-### Lightweight Hugging Face "AI vs Real" datasets
 
-- Several small (1k-10k sample) AI-vs-real classification sets exist on the Hub
-  with MIT/CC-BY licenses.
-- Fine for a demo or a smoke test, too small for a course project that needs
-  enough data to train a baseline and produce robust confusion matrices.
-
-**Assessment:** not chosen.
 
 ---
 
