@@ -11,8 +11,8 @@ also split so both contribute to the final report and presentation.
 |------|-------|-------|
 | Data prep & split infrastructure | **shared** | `prepare-data` CLI + `src/fauxtography/data/` |
 | Baseline ResNet fine-tune | **shared** (reference point) | `train-baseline` CLI, `src/fauxtography/models/baseline.py` |
-| CLIP zero-shot **+ its analysis** | **Collaborator A** | `eval-clip` CLI, `src/fauxtography/models/clip.py`, `notebooks/analysis_clip.ipynb`, `docs/analysis_clip.md` |
-| DINOv2 + linear probe **+ its analysis** | **Collaborator B** | `extract-dinov2` + `train-linear-probe` CLIs, `models/dinov2.py`, `models/linear_probe.py`, `notebooks/analysis_dinov2.ipynb`, `docs/analysis_dinov2.md` |
+| CLIP zero-shot **+ its analysis** | **DemetraP20** | `eval-clip` CLI, `src/fauxtography/models/clip.py`, `notebooks/analysis_clip.ipynb`, `docs/analysis_clip.md` |
+| DINOv2 + linear probe **+ its analysis** | **suprch4rg3d** | `extract-dinov2` + `train-linear-probe` CLIs, `models/dinov2.py`, `models/linear_probe.py`, `notebooks/analysis_dinov2.ipynb`, `docs/analysis_dinov2.md` |
 | Joint comparison & presentation | **split / joint** | `compare` CLI, `notebooks/final_report.ipynb`, `docs/final_report.md`, slides |
 
 ## How the model + analysis pairing works
@@ -31,9 +31,9 @@ Each collaborator:
 | Section | Primary writer |
 |---------|----------------|
 | Dataset description & baseline | collaborator with the shared part |
-| CLIP results interpretation | Collaborator A |
-| DINOv2 results interpretation | Collaborator B |
-| Side-by-side comparison & conclusion | both (A writes first half, B second) |
+| CLIP results interpretation | DemetraP20 |
+| DINOv2 results interpretation | suprch4rg3d |
+| Side-by-side comparison & conclusion | both (DemetraP20 writes first half, suprch4rg3d second) |
 | Presentation slides | both |
 
 ## Git flow

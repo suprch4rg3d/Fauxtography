@@ -8,8 +8,8 @@ error inspection, and write the verdicts that go on the presentation slides.
 |----------|---------|-------|
 | `fauxtography-on-colab.ipynb` | **run first** in Colab: env, Drive, data split, training - everything in one notebook | shared |
 | `00_data_overview.ipynb` | confirm splits + class balance, sample grid | shared |
-| `analysis_clip.ipynb` | CLIP metrics, confusion matrix, error inspection, verdict | Collaborator A |
-| `analysis_dinov2.ipynb` | DINOv2 probe metrics, errors, verdict | Collaborator B |
+| `analysis_clip.ipynb` | CLIP metrics, confusion matrix, error inspection, verdict | DemetraP20 |
+| `analysis_dinov2.ipynb` | DINOv2 probe metrics, errors, verdict | suprch4rg3d |
 | `final_report.ipynb` | side-by-side comparison + joint conclusions | both |
 
 ## Running in Colab (with a GPU)

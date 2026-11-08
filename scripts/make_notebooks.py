@@ -520,7 +520,7 @@ Drive via the env vars above.
         ),
         code(
             """\
-# CLIP zero-shot - Collaborator A. NOT IMPLEMENTED YET.
+# CLIP zero-shot - DemetraP20. NOT IMPLEMENTED YET.
 # Uncomment (remove the leading #) once eval-clip is implemented.
 # !/content/fxt-venv/bin/fauxtography eval-clip
 print("SKIPPED: CLIP eval-clip not implemented yet (see docs/milestones).")
@@ -528,7 +528,7 @@ print("SKIPPED: CLIP eval-clip not implemented yet (see docs/milestones).")
         ),
         code(
             """\
-# DINOv2 - extract features then train the linear probe - Collaborator B.
+# DINOv2 - extract features then train the linear probe - suprch4rg3d.
 # NOT IMPLEMENTED YET. Uncomment once the milestone lands.
 # !/content/fxt-venv/bin/fauxtography extract-dinov2
 # !/content/fxt-venv/bin/fauxtography train-linear-probe
@@ -593,9 +593,9 @@ print("manual step - see cells above")
 
 def main() -> None:
     write("00_data_overview.ipynb", data_overview())
-    write("analysis_clip.ipynb", model_analysis("clip", "CLIP zero-shot", "Collaborator A"))
+    write("analysis_clip.ipynb", model_analysis("clip", "CLIP zero-shot", "DemetraP20"))
     write(
-        "analysis_dinov2.ipynb", model_analysis("dinov2", "DINOv2 + linear probe", "Collaborator B")
+        "analysis_dinov2.ipynb", model_analysis("dinov2", "DINOv2 + linear probe", "suprch4rg3d")
     )
     write("final_report.ipynb", final_report())
     write("fauxtography-on-colab.ipynb", fauxtography_on_colab())
