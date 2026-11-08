@@ -282,6 +282,22 @@ def cmd_compare(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_fetch_genimage(args: argparse.Namespace) -> int:
+    """Download a size-bounded GenImage slice into data/raw/{real,fake}."""
+    from .config import load_config
+    from .data.download_genimage import fetch_genimage
+
+    cfg = load_config("genimage", args.config)
+    if cfg.train_rows_per_class <= 0 and not cfg.cross_generator_rows:
+        logger.warning(
+            "nothing configured to fetch - set train_rows_per_class or cross_generator_rows"
+        )
+    report = fetch_genimage(cfg)
+    if report:
+        logger.info("done:\n %s", report)
+    return 0
+
+
 def cmd_env(args: argparse.Namespace) -> int:
     """Print the runtime/environment report (tensor stack + accelerator).
 
@@ -337,6 +353,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("env", help="print environment / accelerator report")
     p.set_defaults(func=cmd_env)
+
+    p = sub.add_parser("fetch-genimage", help="download a size-bounded GenImage slice")
+    p.add_argument("--config", default="configs/genimage.yaml", type=Path)
+    p.set_defaults(func=cmd_fetch_genimage)
 
     return parser
 

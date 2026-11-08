@@ -1,0 +1,30 @@
+# GenImage download configuration (data prep).
+#
+# Amount of data is decided HERE, by rows per class - because image count is
+# what drives training cost and accuracy. Start small, measure, then raise it.
+# Mirror rows: each shard holds ~1,720 images.
+#
+# Quick reference (rough):
+#   train_rows_per_class: 5000   -> ~10k images,  ~3.5 GB
+#   train_rows_per_class: 20000  -> ~40k images, ~13 GB
+#   train_rows_per_class: 60000  -> ~120k images,~40 GB
+
+mirror: nebula/GenImage-arrow
+train_generator: stable_diffusion_v_1_4   # SD v1.4 fakes + ImageNet real
+
+# Main train pool: how many real AND fake images to fetch. 0 = skip train fetch.
+train_rows_per_class: 0
+
+# Fetch the generator's official test subset (usually small, keep True).
+fetch_full_test: true
+
+# Cross-generator sets for the generalization analysis (generator -> rows).
+# Each walks down the test/test split of that generator.
+cross_generator_rows:
+  Midjourney: 0
+  ADM: 0
+  BigGAN: 0
+
+# Where the fetched real/ + fake/ folders are written.
+raw_dir: data/raw
+repo_cache: ~/.cache/huggingface

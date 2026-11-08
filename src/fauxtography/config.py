@@ -92,12 +92,34 @@ class Dinov2Config:
 
 
 # --------------------------------------------------------------------------- #
+# --------------------------------------------------------------------------- #
+# GenImage download (data prep)
+# --------------------------------------------------------------------------- #
+@dataclass
+class GenImageConfig:
+    name: str = "genimage"
+    mirror: str = "nebula/GenImage-arrow"  # HuggingFace repo
+    train_generator: str = "stable_diffusion_v_1_4"  # gen for train/fake
+    # How many rows (images per class) to fetch for train. 0 = skip train.
+    train_rows_per_class: int = 0
+    # Fetch the full test subset (usually small).
+    fetch_full_test: bool = True
+    # Optional cross-generator sets for the generalization analysis,
+    # as {generator: rows_per_class}. 0/skip to omit.
+    cross_generator_rows: dict[str, int] = field(default_factory=dict)
+    # Where to write the fetched real/fake folders.
+    raw_dir: str = "data/raw"
+    repo_cache: str = "~/.cache/huggingface"  # HF cache stays separate
+
+
+# --------------------------------------------------------------------------- #
 # Loading
 # --------------------------------------------------------------------------- #
 _CONFIG_TYPES: dict[str, type] = {
     "baseline": BaselineConfig,
     "clip": ClipConfig,
     "dinov2": Dinov2Config,
+    "genimage": GenImageConfig,
 }
 
 
