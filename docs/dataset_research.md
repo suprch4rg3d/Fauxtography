@@ -173,6 +173,36 @@ Concretely, our plan is to train the baseline ResNet and DINOv2 probe on the
 - **License note:** GenImage is CC BY-NC-SA 4.0 - fine for a university project;
   include the citation in the report.
 
+### Known bias: compression/resolution shortcut
+
+Our own corpus observation (from the prepared SD v1.4 slice with 10,000
+real + 10,000 fake images):
+
+> Very funny how for the same amount of training, 10001 each for real and fake
+> the real are 1.15GB and the fake are 4.58GB.
+
+So real images occupy **1.1-1.15 GB** while the same number of fakes occupy
+**4.3-4.6 GB** - roughly a 4x gap in file size. Measured per-file: real average
+~112 KB (median 105 KB), fake average ~447 KB (median 448 KB).
+
+Why: the real images are ImageNet photographs downscaled to ~500 px and heavily
+JPEG-compressed, while the fakes are generated natively at 512x512 and compress
+much less. A detector could therefore score highly by learning a **compression
+/ resolution shortcut** ("bigger, high-res, lightly-compressed image = fake")
+rather than any general notion of AI-generated content.
+
+This is a known, documented flaw of GenImage - see the `Fake or JPEG?` paper
+listed in the references below. Mitigations to consider in the analysis:
+
+1. **Acknowledge it as a finding:** measure accuracy on a classifier fed
+   *file size / resolution alone*, or recompress both classes and see how
+   accuracy moves. If it collapses, the detectors were partly exploiting the
+   shortcut - a strong analysis point.
+2. **Normalize before training:** resize both classes to one size and
+   re-encode at the same JPEG quality to remove the shortcut at the source.
+3. **Ignore for course scope:** acceptable, but do not overclaim that high
+   accuracy proves robust detection.
+
 ## References
 
 - GenImage: A Million-Scale Benchmark for Detecting AI-Generated Image.
