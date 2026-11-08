@@ -442,11 +442,13 @@ os.chdir(repo)
 DATA_ROOT = "/content/drive/MyDrive/fauxtography/data"     # WHERE IS YOUR DATASET?
 RUN_DIR = "/content/drive/MyDrive/fauxtography/experiments"   # checkpoints / features
 RESULTS_DIR = "/content/drive/MyDrive/fauxtography/results"   # committed metrics
+RAW_DIR = "/content/drive/MyDrive/fauxtography/data/raw"   # raw/ test lives here
 
 # Export overrides - the CLI/package pick these up automatically.
 os.environ["FAUXTOGRAPHY_DATA_ROOT"] = DATA_ROOT
 os.environ["FAUXTOGRAPHY_RUN_DIR"] = RUN_DIR
 os.environ["FAUXTOGRAPHY_RESULTS_DIR"] = RESULTS_DIR
+os.environ["FAUXTOGRAPHY_HELDOUT_TEST"] = os.path.join(RAW_DIR, "test")
 print("configured:", DATA_ROOT)
 """
         ),
