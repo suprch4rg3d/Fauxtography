@@ -63,11 +63,24 @@ def clip_transforms(image_size: int = 224) -> ModelTransforms:
     raise NotImplementedError
 
 
-def dinov2_transforms(image_size: int = 224) -> ModelTransforms:
-    """DINOv2 pipeline: square resize + ImageNet normalization.
+def dinov2_transforms(image_size: int = 224, square: bool = False) -> ModelTransforms:
+    """DINOv2 pipeline: ImageNet normalization, train = eval (frozen backbone).
 
-    Features are extracted from a frozen backbone, so train and eval use the
-    same pipeline (no augmentation that would shift the feature geometry).
+    Default follows the official DINOv2 preprocessing: resize the shorter
+    side to `image_size + 32` (256 for 224) then center-crop to
+    `image_size`, which preserves aspect ratio. Square-stretch past 224 can
+    degrade ViT features more than CNNs, so it is opt-in via ``square=True``
+    (kept for A/B comparison with the earlier runs).
     """
-    eval_tf = _resize_eval(image_size)
+    if square:
+        eval_tf = _resize_eval(image_size)
+    else:
+        eval_tf = transforms.Compose(
+            [
+                transforms.Resize(image_size + 32),
+                transforms.CenterCrop(image_size),
+                transforms.ToTensor(),
+                _imagenet_normalize(),
+            ]
+        )
     return ModelTransforms(train_transform=eval_tf, eval_transform=eval_tf)

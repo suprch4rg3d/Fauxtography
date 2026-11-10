@@ -55,8 +55,10 @@ poetry run fauxtography train-linear-probe
   the whole image into one vector. For the `vitb14` arch that is a **768-dim**
   vector per image.
 - Saves the features per split as `.pt` files under
-  `<run_dir>/dinov2/features/{train,val,test,heldout}.pt`, alongside a
-  `metadata.json` (arch + image size).
+  `<run_dir>/dinov2/features/{canonical,square}/{train,val,test,heldout}.pt`
+  (the subfolder is the preprocessing variant, so square vs canonical runs
+  never reuse each other's cache), alongside a `metadata.json` (arch, image
+  size, variant).
 
 This step is the expensive one (one full forward pass per image), so the
 results are **cached**. Re-running skips splits that already have a cache
@@ -80,7 +82,7 @@ file.
 | Backbone source | HuggingFace `transformers`, not torchvision | The pinned `torchvision==0.29.2` build ships **no DINOv2** weights (verified via `list_models()`). `transformers` is already a dependency and offers the exact Meta checkpoints |
 | Arch names | `dinov2_vits14` / `vitb14` / `vitl14` | Mirror torchvision naming; config picks one (`vitb14` default = balanced) |
 | Backbone frozen? | Yes, 100% | That is the whole point of a foundation model - features transfer, so we only train the head. Faster + far fewer trainable params |
-| Train vs eval transform | **Identical** (resize to 224, ImageNet-normalize, no augmentation) | A frozen backbone needs *consistent* feature geometry. Augmenting the train set but not the test set would make the features it sees differ between phases |
+| Train vs eval transform | **Identical** (official DINOv2 preproc: resize short side to 256 + center-crop 224, ImageNet-normalize, no augmentation; `square_resize: true` opts back into plain square resize) | A frozen backbone needs *consistent* feature geometry, and official DINOv2 preproc avoids the aspect-ratio distortion of square stretching |
 | Head | Single linear layer | Baseline for linear-probe evaluation, cheap, and readable |
 | Feature cache | `.pt` per split, skip-if-present | Extraction is the expensive step; the head can be re-tuned without re-running the backbone |
 
