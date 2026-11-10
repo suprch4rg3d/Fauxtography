@@ -12,9 +12,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from torchvision import transforms
+from torchvision.transforms import InterpolationMode
 
 _IMAGENET_MEAN = [0.485, 0.456, 0.406]
 _IMAGENET_STD = [0.229, 0.224, 0.225]
+
+_CLIP_MEAN = [0.48145466, 0.4578275, 0.40821073]
+_CLIP_STD = [0.26862954, 0.26130258, 0.27577711]
 
 
 @dataclass
@@ -60,7 +64,14 @@ def _resize_eval(image_size: int) -> transforms.Compose:
 
 def clip_transforms(image_size: int = 224) -> ModelTransforms:
     """TODO(impl): CLIP-consistent resize + CLIP normalization."""
-    raise NotImplementedError
+    transform = transforms.Compose([
+        transforms.Lambda(lambda image: image.convert("RGB")),
+        transforms.Resize(image_size, interpolation=InterpolationMode.BICUBIC),
+        transforms.CenterCrop(image_size),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=_CLIP_MEAN, std=_CLIP_STD),
+    ])
+    return ModelTransforms(train_transform=transform, eval_transform=transform)
 
 
 def dinov2_transforms(image_size: int = 224) -> ModelTransforms:

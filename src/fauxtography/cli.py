@@ -296,11 +296,69 @@ def cmd_train_baseline(args: argparse.Namespace) -> int:
 
 
 def cmd_eval_clip(args: argparse.Namespace) -> int:
-    from .config import load_config
+    import json
 
-    load_config("clip", args.config)  # validate+warm the config at call time
-    logger.info("TODO: implement CLIP zero-shot evaluation (config=%s)", args.config)
-    raise NotImplementedError("CLIP milestone - see docs/milestones.")
+    import numpy as np
+    import torch
+    from torch.utils.data import DataLoader
+
+    from .config import load_config
+    from .data.dataset import FauxtoDataset
+    from .data.transforms import clip_transforms
+    from .evaluate.metrics import classification_report, confusion_matrix_data, evaluate_predictions
+    from .evaluate.visual import plot_confusion_matrix
+    from .models.clip import CLIPZeroShot
+    from .utils.device import get_device
+    from .utils.seed import set_seed
+
+    cfg = load_config("clip", args.config)
+    set_seed(cfg.data.seed)
+    device = get_device()
+    model = CLIPZeroShot(cfg, device=device)
+    transform = clip_transforms(cfg.data.image_size).eval_transform
+
+    results_dir = Path(cfg.output.results_dir) / "clip"
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    def evaluate_folder(folder: Path, prefix: str, title: str) -> None:
+        dataset = FauxtoDataset(folder, transform=transform)
+        loader = DataLoader(
+            dataset,
+            batch_size=cfg.batch_size,
+            shuffle=False,
+            num_workers=cfg.data.num_workers,
+            pin_memory=device.type == "cuda",
+        )
+        y_true, y_pred = [], []
+        for images, labels in loader:
+            preds, _probs = model.predict(images)
+            y_true.extend(labels.tolist())
+            y_pred.extend(preds.cpu().tolist())
+
+        y_true = np.asarray(y_true)
+        y_pred = np.asarray(y_pred)
+        metrics = evaluate_predictions(y_true, y_pred)
+        report = classification_report(y_true, y_pred)
+        cm = confusion_matrix_data(y_true, y_pred)
+
+        (results_dir / f"{prefix}metrics.json").write_text(
+            json.dumps({
+                "accuracy": metrics["accuracy"],
+                "n_samples": int(metrics["n_samples"]),
+                "classification_report": report,
+            }, indent=2)
+        )
+        np.save(results_dir / f"{prefix}y_true.npy", y_true)
+        np.save(results_dir / f"{prefix}y_pred.npy", y_pred)
+        plot_confusion_matrix(
+            cm, results_dir / f"{prefix}confusion_matrix.svg", title=title
+        )
+        logger.info("%s accuracy=%.4f -> %s", title, metrics["accuracy"], results_dir)
+
+    evaluate_folder(Path(cfg.data.root) / "test", "", "CLIP - internal split")
+    if cfg.data.heldout_test:
+        evaluate_folder(Path(cfg.data.heldout_test), "heldout_", "CLIP - held-out test")
+    return 0
 
 
 def cmd_extract_dinov2(args: argparse.Namespace) -> int:
