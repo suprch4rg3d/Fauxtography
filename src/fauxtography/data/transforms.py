@@ -61,11 +61,14 @@ def _resize_eval(image_size: int) -> transforms.Compose:
         ]
     )
 
+def convert_to_rgb(image):
+    """Convert an image to RGB format."""
+    return image.convert("RGB")
 
 def clip_transforms(image_size: int = 224) -> ModelTransforms:
     """TODO(impl): CLIP-consistent resize + CLIP normalization."""
     transform = transforms.Compose([
-        transforms.Lambda(lambda image: image.convert("RGB")),
+        transforms.Lambda(convert_to_rgb),
         transforms.Resize(image_size, interpolation=InterpolationMode.BICUBIC),
         transforms.CenterCrop(image_size),
         transforms.ToTensor(),
