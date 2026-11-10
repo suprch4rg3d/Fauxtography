@@ -321,7 +321,7 @@ def cmd_extract_dinov2(args: argparse.Namespace) -> int:
     set_seed(cfg.data.seed)
     device = get_device()
 
-    tf = dinov2_transforms(cfg.data.image_size)
+    tf = dinov2_transforms(cfg.data.image_size, square=cfg.square_resize)
     splits = get_datasets(cfg.data, tf.train_transform, tf.eval_transform)
 
     heldout_root = cfg.data.heldout_test
@@ -330,13 +330,17 @@ def cmd_extract_dinov2(args: argparse.Namespace) -> int:
 
     extractor = DINOv2FeatureExtractor(arch=cfg.arch, device=device)
     logger.info(
-        "extracting with %s on %s (%d-dim features)",
+        "extracting with %s on %s (%d-dim features, square_resize=%s)",
         cfg.arch,
         device,
         extractor.hidden_size,
+        cfg.square_resize,
     )
 
-    out = Path(cfg.output.run_dir) / "dinov2" / "features"
+    # Variant-keyed cache so square vs canonical preproc never reuse each
+    # other's features (and re-running with a tweak re-extracts).
+    variant = "square" if cfg.square_resize else "canonical"
+    out = Path(cfg.output.run_dir) / "dinov2" / "features" / variant
     out.mkdir(parents=True, exist_ok=True)
 
     cache_path = out / "metadata.json"
@@ -345,6 +349,8 @@ def cmd_extract_dinov2(args: argparse.Namespace) -> int:
             {
                 "arch": cfg.arch,
                 "image_size": cfg.data.image_size,
+                "preprocess": variant,
+                "square_resize": cfg.square_resize,
                 "pretrained": True,
                 "note": "frozen DINOv2 [CLS] features; per-split .pt files next to this",
             },
@@ -397,7 +403,8 @@ def cmd_train_linear_probe(args: argparse.Namespace) -> int:
     set_seed(cfg.data.seed)
     device = get_device()
 
-    feats_dir = Path(cfg.output.run_dir) / "dinov2" / "features"
+    variant = "square" if cfg.square_resize else "canonical"
+    feats_dir = Path(cfg.output.run_dir) / "dinov2" / "features" / variant
 
     def _load(split: str):
         path = feats_dir / f"{split}.pt"

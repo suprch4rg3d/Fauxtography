@@ -6,6 +6,11 @@ probe_epochs: 20
 probe_lr: 0.01
 probe_weight_decay: 0.0
 num_workers: 4
+# Official DINOv2 preprocessing: resize shorter side to 256 + center-crop
+# 224. Set true to fall back to plain square resize (the earlier runs).
+# Features are cached per variant, so changing this re-extracts instead of
+# reusing the wrong transformation's cache.
+square_resize: false
 
 data:
   root: data

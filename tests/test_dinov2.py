@@ -28,6 +28,22 @@ def test_dinov2_transforms_returns_both_pipelines():
     assert tf.train_transform is tf.eval_transform
 
 
+def test_dinov2_canonical_preserves_aspect_ratio():
+    from PIL import Image
+
+    canonical = dinov2_transforms(224, square=False).eval_transform
+    square = dinov2_transforms(224, square=True).eval_transform
+
+    wide = Image.new("RGB", (1000, 500))
+    # Canonical: short side (500) is resized to 256 first, then center-cropped;
+    # the intermediate resize step must exist (Resize), unlike the square path.
+    assert canonical.transforms[0].size == 256
+    assert tuple(canonical.transforms[1].size) == (224, 224)
+    # Both end at the model input size.
+    assert canonical(wide).shape == (3, 224, 224)
+    assert square(wide).shape == (3, 224, 224)
+
+
 def test_dinov2_arch_validation():
     import pytest
 

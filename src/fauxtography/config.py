@@ -90,6 +90,8 @@ class Dinov2Config:
     probe_lr: float = 1e-2
     probe_weight_decay: float = 0.0
     num_workers: int = 4
+    # Official DINOv2 preproc (resize short side + center crop) unless true.
+    square_resize: bool = False
     data: DataConfig = field(default_factory=DataConfig)
     output: OutputConfig = field(default_factory=OutputConfig)
 
