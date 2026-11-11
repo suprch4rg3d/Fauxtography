@@ -27,6 +27,9 @@ class DataConfig:
     # Optional official held-out test set (real/fake folder pair), e.g.
     # "data/raw/test" when using GenImage. Empty = skip extra eval.
     heldout_test: str = ""
+    # Cross-generator analysis sets: subfolders each with real/ + fake/
+    # (one per generator, e.g. Midjourney/ADM/BigGAN under data/raw/cross).
+    cross_dir: str = "data/raw/cross"
 
 
 @dataclass
@@ -178,12 +181,14 @@ def _build(cfg_type: type, raw: dict[str, Any]) -> Any:
 #   FAUXTOGRAPHY_RESULTS_DIR    -> cfg.output.results_dir    (committed metrics)
 #   FAUXTOGRAPHY_RAW_DIR        -> cfg.raw_dir               (genimage download)
 #   FAUXTOGRAPHY_HELDOUT_TEST   -> cfg.data.heldout_test     (official test set)
+#   FAUXTOGRAPHY_CROSS_DIR      -> cfg.data.cross_dir         (cross-generator sets)
 _PATH_OVERRIDES = {
     "FAUXTOGRAPHY_DATA_ROOT": ("data", "root"),
     "FAUXTOGRAPHY_RUN_DIR": ("output", "run_dir"),
     "FAUXTOGRAPHY_RESULTS_DIR": ("output", "results_dir"),
     "FAUXTOGRAPHY_RAW_DIR": (None, "raw_dir"),
     "FAUXTOGRAPHY_HELDOUT_TEST": ("data", "heldout_test"),
+    "FAUXTOGRAPHY_CROSS_DIR": ("data", "cross_dir"),
 }
 
 

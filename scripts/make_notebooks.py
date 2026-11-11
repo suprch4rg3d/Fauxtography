@@ -449,6 +449,7 @@ os.environ["FAUXTOGRAPHY_DATA_ROOT"] = DATA_ROOT
 os.environ["FAUXTOGRAPHY_RUN_DIR"] = RUN_DIR
 os.environ["FAUXTOGRAPHY_RESULTS_DIR"] = RESULTS_DIR
 os.environ["FAUXTOGRAPHY_HELDOUT_TEST"] = os.path.join(RAW_DIR, "test")
+os.environ["FAUXTOGRAPHY_CROSS_DIR"] = os.path.join(RAW_DIR, "cross")
 print("configured:", DATA_ROOT)
 """
         ),
@@ -535,9 +536,13 @@ print("SKIPPED: CLIP eval-clip not implemented yet (see docs/milestones).")
         ),
         code(
             """\
-# DINOv2 - extract features then train the linear probe - suprch4rg3d.
+# DINOv2 - extract features, train the linear probe, then score the
+# cross-generator sets (Midjourney / ADM / BigGAN) with the SAME probe - no
+# retraining - suprch4rg3d. Cross-gen results land under
+# results/dinov2/cross/<generator>/.
 !/content/fxt-venv/bin/fauxtography extract-dinov2
 !/content/fxt-venv/bin/fauxtography train-linear-probe
+!/content/fxt-venv/bin/fauxtography eval-cross
 """,
         ),
         md(
