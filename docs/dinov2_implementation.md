@@ -108,11 +108,11 @@ file.
 
 ### The question
 
-The DINOv2 probe (and the baseline) is trained on fakes from **one** generator:
-Stable Diffusion v1.4. Does that knowledge survive fakes from a *different*
-generator - Midjourney, ADM or BigGAN? A detector that only recognizes "the
-one AI look it was trained on" is not really a fake detector; it is a
-Stable-Diffusion detector.
+The DINOv2 probe (and the baseline) is trained on fakes from **one**
+generator: Stable Diffusion v1.4. The honest question is: does that
+knowledge survive fakes from a **different** generator - Midjourney, ADM
+or BigGAN? A detector that only recognizes "the one AI look it was trained
+on" is not really a fake detector; it is a Stable-Diffusion detector.
 
 The GenImage paper shows this is a real trap for fine-tuned CNNs: with
 ResNet-50 trained on SD v1.4, same-generator accuracy is ~99.9% but the
@@ -145,14 +145,26 @@ Expected output table (SD v1.4-trained; ours upcoming):
 | ADM         | ~53.5%          | TBD           |
 | BigGAN      | ~52.0%          | TBD           |
 
+### Why this is the most valuable experiment we can run
+
+- A same-generator accuracy table only tells the professor what a paper
+  already reported; our own cross-generator numbers for DINOv2 (and the
+  baseline) are new (see `docs/contributions.md` for the novelty framing).
+- It tests the **robustness claim** central to the whole project: do
+  strong features (DINOv2) collapse less than a fine-tuned CNN when the
+  generator changes? DINOv2 was trained on varied natural images, so it
+  may hold its accuracy better than the paper's ResNet-50 collapse. Or it
+  may not - either way it is a result worth having.
+- It is **cheap**: a few hundred extra feature extractions, no training.
+
 ### How to read the result
 
-- DINOv2 stays high across generators: foundation-model features generalize,
-  CNNs memorize the generator's look.
-- DINOv2 collapses like ResNet: the problem is harder than features; strong
-  representations still need training signal.
+- If DINOv2 stays high across generators, the story is "foundation-model
+  features generalize; CNNs memorize the generator's look".
+- If DINOv2 collapses like ResNet, the story is "the problem is harder
+  than features; even strong representations need training signal".
 
-Either is a defensible, interesting result for the final report.
+Both are defensible, interesting conclusions for the report.
 
 ## 8. References
 
