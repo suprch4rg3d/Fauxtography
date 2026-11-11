@@ -101,64 +101,69 @@ file.
 - `arch`: `dinov2_vits14` (small/fast) | `dinov2_vitb14` (default) | `dinov2_vitl14` (big/strong)
 - `feature_batch_size`: images per forward pass during extraction
 - `probe_batch_size`, `probe_epochs`, `probe_lr`, `probe_weight_decay`: linear-head training
-- `data.root`, `output.run_dir`, `output.results_dir`: standard paths (override via the `FAUXTOGRAPHY_*` env vars)
+- `data.root`, `data.cross_dir`, `output.run_dir`, `output.results_dir`: standard paths
+  (override via the `FAUXTOGRAPHY_*` env vars)
 
-## 7. Cross-generator analysis (the interesting question)
+## 7. Cross-generator analysis (`eval-cross`)
 
-### The problem in plain words
+### The question
 
-Our DINOv2 probe (and the baseline) is trained on fakes from **one**
+The DINOv2 probe (and the baseline) is trained on fakes from **one**
 generator: Stable Diffusion v1.4. The honest question is: does that
-knowledge survive contact with fakes from a **different** generator -
-Midjourney, ADM, or BigGAN? A detector that only recognizes "the one
-AI look it was trained on" is not really a fake detector; it is a
-Stable-Diffusion detector.
+knowledge survive fakes from a **different** generator - Midjourney, ADM
+or BigGAN? A detector that only recognizes "the one AI look it was trained
+on" is not really a fake detector; it is a Stable-Diffusion detector.
 
-The GenImage paper shows this is a real trap. With ResNet-50, training on
-SD v1.4 and testing on SD v1.4 scores ~99.9%, but the same detector drops
-to ~54.9% on Midjourney, ~53.5% on ADM and ~52.0% on BigGAN (see
-`docs/dataset_research.md` for the full table). That is barely better than
-coin-flipping - each generator has its own visual signature, and the
-classifier latched onto the one it saw.
+The GenImage paper shows this is a real trap for fine-tuned CNNs: with
+ResNet-50 trained on SD v1.4, same-generator accuracy is ~99.9% but the
+same detector drops to ~54.9% on Midjourney, ~53.5% on ADM and ~52.0% on
+BigGAN (see `docs/dataset_research.md`). Barely above coin-flip.
 
-### What we do about it
+### What `eval-cross` does
 
-The cross-generator sets are already downloaded (
-`data/raw/cross/{Midjourney,ADM,BigGAN}`, 1000 real + 1000 fake each).
-The plan:
+Scores the **already-trained** probe (no retraining - that would defeat the
+point) on the cross-generator sets under `data/raw/cross/<generator>/`
+(`real/` + `fake/`, 1000 each). It:
 
-1. **Extract features** for all three cross-generator sets with the same
-   frozen DINOv2 backbone and the same evaluation transform.
-2. **Reuse the probe** trained on SD v1.4 features - no retraining, that
-   would defeat the point.
-3. **Score each generator** with the standard metrics (accuracy,
-   confusion matrix) and compare:
+1. Loads the probe checkpoint written by `train-linear-probe`.
+2. Extracts features for each generator with the **same** frozen backbone
+   and the **same** eval transform as the main run (variant-keyed feature
+   cache, so `square_resize` changes never reuse wrong-transform features).
+3. Writes per-generator metrics to `results/dinov2/cross/<generator>/`
+   (`metrics.json`, `y_pred.npy`, `y_true.npy`, `confusion_matrix.svg`).
 
-   | Trained on | Tested on | Expected from paper (ResNet-50) | Ours |
-   |------------|-----------|----------------------------------|------|
-   | SD v1.4    | SD v1.4   | ~99.9%                          | TBD  |
-   | SD v1.4    | Midjourney | ~54.9%                        | TBD  |
-   | SD v1.4    | ADM       | ~53.5%                         | TBD  |
-   | SD v1.4    | BigGAN    | ~52.0%                         | TBD  |
+```
+poetry run fauxtography eval-cross
+```
+
+Expected output table (SD v1.4-trained; ours upcoming):
+
+| Tested on   | Paper ResNet-50 | Ours (DINOv2) |
+|-------------|-----------------|---------------|
+| SD v1.4     | ~99.9%          | ~88.7%        |
+| Midjourney  | ~54.9%          | TBD           |
+| ADM         | ~53.5%          | TBD           |
+| BigGAN      | ~52.0%          | TBD           |
 
 ### Why this is the most valuable experiment we can run
 
-- It is the **novel** result: a same-generator accuracy table only tells
-  the professor what a paper already reported, but our own cross-generator
-  numbers for DINOv2 (and the baseline) are new.
-- It tests the **robustness claim** that is central to the whole project:
-  do strong features (DINOv2) collapse less than a fine-tuned CNN when the
+- A same-generator accuracy table only tells the professor what a paper
+  already reported; our own cross-generator numbers for DINOv2 (and the
+  baseline) are new (see `docs/contributions.md` for the novelty framing).
+- It tests the **robustness claim** central to the whole project: do
+  strong features (DINOv2) collapse less than a fine-tuned CNN when the
   generator changes? DINOv2 was trained on varied natural images, so it
   may hold its accuracy better than the paper's ResNet-50 collapse. Or it
   may not - either way it is a result worth having.
 - It is **cheap**: a few hundred extra feature extractions, no training.
 
-### What would the result mean?
+### How to read the result
 
 - If DINOv2 stays high across generators, the story is "foundation-model
   features generalize; CNNs memorize the generator's look".
 - If DINOv2 collapses like ResNet, the story is "the problem is harder
   than features; even strong representations need training signal".
+
 Both are defensible, interesting conclusions for the report.
 
 ## 8. References
