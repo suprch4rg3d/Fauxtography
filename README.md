@@ -14,8 +14,9 @@ by comparing three approaches on a shared test set:
 **Read first:** the plan in [`docs/technical_plan.md`](docs/technical_plan.md)
 (method + analysis strategy), the dataset choice in
 [`docs/dataset_research.md`](docs/dataset_research.md), the team split in
-[`docs/work_division.md`](docs/work_division.md), and
-[`docs/setup.md`](docs/setup.md) (install + Colab).
+[`docs/work_division.md`](docs/work_division.md),
+[`docs/contributions.md`](docs/contributions.md) (novelty and claims),
+and [`docs/setup.md`](docs/setup.md) (install + Colab).
 
 ---
 

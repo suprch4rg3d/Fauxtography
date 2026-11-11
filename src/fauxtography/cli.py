@@ -8,6 +8,7 @@ console script:
     poetry run fauxtography eval-clip
     poetry run fauxtography extract-dinov2
     poetry run fauxtography train-linear-probe
+    poetry run fauxtography eval-cross
     poetry run fauxtography compare
     poetry run fauxtography env
 
@@ -44,6 +45,7 @@ DEFAULT_CONFIG = {
     "eval-clip": "configs/clip.yaml",
     "extract-dinov2": "configs/dinov2.yaml",
     "train-linear-probe": "configs/dinov2.yaml",
+    "eval-cross": "configs/dinov2.yaml",
 }
 
 
@@ -507,6 +509,140 @@ def cmd_train_linear_probe(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_eval_cross(args: argparse.Namespace) -> int:
+    """Score the SD-trained DINOv2 probe against cross-generator sets.
+
+    No retraining: reuses the frozen backbone and the probe checkpoint written
+    by `train-linear-probe`, and applies the same preprocessing as the main
+    run (variant-keyed feature cache). One output dir per generator under
+    `results/dinov2/cross/<generator>/`.
+    """
+    import json
+
+    import numpy as np
+    import torch
+    from torch.utils.data import DataLoader
+
+    from .config import load_config
+    from .data.dataset import FauxtoDataset
+    from .data.transforms import dinov2_transforms
+    from .evaluate.metrics import classification_report, confusion_matrix_data, evaluate_predictions
+    from .evaluate.visual import plot_confusion_matrix
+    from .models.dinov2 import DINOv2FeatureExtractor
+    from .models.linear_probe import LinearProbe
+    from .utils.device import get_device
+    from .utils.seed import set_seed
+
+    cfg = load_config("dinov2", args.config)
+    set_seed(cfg.data.seed)
+    device = get_device()
+
+    variant = "square" if cfg.square_resize else "canonical"
+    tf = dinov2_transforms(cfg.data.image_size, square=cfg.square_resize)
+
+    # Probe checkpoint produced by train-linear-probe (variant-consistent
+    # training features are guaranteed by the same square_resize config).
+    probe_path = Path(cfg.output.run_dir) / "dinov2" / "probe.pt"
+    if not probe_path.exists():
+        raise FileNotFoundError(
+            f"no probe at {probe_path} - run `fauxtography train-linear-probe` first"
+        )
+    probe_state = torch.load(probe_path, map_location="cpu", weights_only=True)[
+        "probe_state_dict"
+    ]
+    in_features = next(iter(probe_state.values())).shape[1]
+    probe = LinearProbe(in_features, num_classes=2).to(device)
+    probe.load_state_dict(probe_state)
+    probe.eval()
+
+    # Cross-generator root: each subfolder is a generator with real/ + fake/.
+    cross_root = Path(cfg.data.cross_dir)
+    if not cross_root.is_dir():
+        raise FileNotFoundError(f"cross-generator root missing: {cross_root}")
+    generators = sorted(
+        d.name
+        for d in cross_root.iterdir()
+        if d.is_dir() and (d / "real").is_dir() and (d / "fake").is_dir()
+    )
+    if not generators:
+        raise FileNotFoundError(
+            f"no generator folders (real/ + fake/) under {cross_root}"
+        )
+
+    extractor = DINOv2FeatureExtractor(arch=cfg.arch, device=device)
+    logger.info(
+        "cross-generator eval: %s on %s, generators=%s, preprocess=%s",
+        cfg.arch,
+        device,
+        generators,
+        variant,
+    )
+
+    feats_dir = Path(cfg.output.run_dir) / "dinov2" / "features" / variant
+    feats_dir.mkdir(parents=True, exist_ok=True)
+
+    results_root = Path(cfg.output.results_dir) / "dinov2" / "cross"
+    results_root.mkdir(parents=True, exist_ok=True)
+
+    for gen in generators:
+        gen_root = cross_root / gen
+        gen_feats = feats_dir / f"cross_{gen}.pt"
+        if gen_feats.exists():
+            logger.info("reuse cached features -> %s", gen_feats)
+            feats = torch.load(gen_feats, map_location="cpu", weights_only=True)
+            x = feats["features"]
+            y_true = feats["labels"].long()
+        else:
+            ds = FauxtoDataset(gen_root, transform=tf.eval_transform)
+            loader = DataLoader(
+                ds,
+                batch_size=cfg.feature_batch_size,
+                shuffle=False,
+                num_workers=cfg.num_workers,
+                pin_memory=device.type == "cuda",
+            )
+            feats, labels = [], []
+            for images, _labels in loader:
+                feats.append(extractor.extract(images).cpu())
+                labels.append(_labels)
+            x = torch.cat(feats)
+            y_true = torch.cat(labels).long()
+            torch.save({"features": x, "labels": y_true}, gen_feats)
+            logger.info("cached %s features (%d x %d)", gen, len(ds), extractor.hidden_size)
+
+        with torch.no_grad():
+            logits = probe(x.to(device))
+        y_pred = logits.argmax(1).cpu().numpy()
+        y_true_np = y_true.numpy()
+        metrics = evaluate_predictions(y_true_np, y_pred)
+        report = classification_report(y_true_np, y_pred)
+        cm = confusion_matrix_data(y_true_np, y_pred)
+
+        out = results_root / gen
+        out.mkdir(parents=True, exist_ok=True)
+        np.save(out / "y_true.npy", y_true_np)
+        np.save(out / "y_pred.npy", y_pred)
+        (out / "metrics.json").write_text(
+            json.dumps(
+                {
+                    "generator": gen,
+                    "preprocess": variant,
+                    "accuracy": metrics["accuracy"],
+                    "n_samples": int(metrics["n_samples"]),
+                    "classification_report": report,
+                },
+                indent=2,
+            )
+        )
+        plot_confusion_matrix(
+            cm, out / "confusion_matrix.svg", title=f"DINOv2 cross-gen: {gen}"
+        )
+        logger.info(
+            "%s accuracy=%.4f -> %s", gen, metrics["accuracy"], out
+        )
+    return 0
+
+
 def cmd_compare(args: argparse.Namespace) -> int:
     """Aggregate each model's metrics.json into one comparison CSV/report."""
     import csv
@@ -616,6 +752,10 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("compare", help="aggregate per-model metrics")
     p.add_argument("--results-dir", default="results", type=Path)
     p.set_defaults(func=cmd_compare)
+
+    p = sub.add_parser("eval-cross", help="score DINOv2 probe on cross-generator sets")
+    p.add_argument("--config", default=DEFAULT_CONFIG["train-linear-probe"], type=Path)
+    p.set_defaults(func=cmd_eval_cross)
 
     p = sub.add_parser("env", help="print environment / accelerator report")
     p.set_defaults(func=cmd_env)

@@ -33,6 +33,18 @@ def test_heldout_test_absent_env_uses_yaml(monkeypatch):
     assert cfg.data.heldout_test == "data/raw/test"  # from configs/baseline.yaml
 
 
+def test_cross_dir_env_override(monkeypatch):
+    monkeypatch.setenv("FAUXTOGRAPHY_CROSS_DIR", "/content/drive/MyDrive/fauxtography/data/raw/cross")
+    cfg = load_config("dinov2")
+    assert cfg.data.cross_dir == "/content/drive/MyDrive/fauxtography/data/raw/cross"
+
+
+def test_cross_dir_absent_env_uses_default(monkeypatch):
+    monkeypatch.delenv("FAUXTOGRAPHY_CROSS_DIR", raising=False)
+    cfg = load_config("dinov2")
+    assert cfg.data.cross_dir == "data/raw/cross"  # default
+
+
 def test_path_override_absent_env_vars(monkeypatch):
     monkeypatch.delenv("FAUXTOGRAPHY_DATA_ROOT", raising=False)
     cfg = load_config("baseline")
