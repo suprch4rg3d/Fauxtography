@@ -559,17 +559,50 @@ print("SKIPPED: CLIP eval-clip not implemented yet (see docs/milestones).")
         ),
         md(
             """\
-## 9. Backup sanity
+## 9. Backup to Drive (experiments + results)
 
-Confirm the outputs actually landed on Drive (they survive session drops).
-Then open `00_data_overview.ipynb` and the model analysis notebooks to
-inspect the results and write the verdicts.
+Persist both the heavy **experiments** (checkpoints, cached DINOv2 features,
+recompressed mirrors) and the small committed **results** (json, svg, npy, csv)
+into the same Google Drive root where the dataset and its splits live:
+`/content/drive/MyDrive/fauxtography/`. Idempotent - rerunning only copies
+what is newer, so it is safe after a session drop too.
 """
         ),
         code(
             """\
-!ls /content/drive/MyDrive/fauxtography/results
-!echo "---" && ls /content/drive/MyDrive/fauxtography/results/clip 2>/dev/null || echo "no clip results yet"
+import os
+import shutil
+
+DRIVE_ROOT = "/content/drive/MyDrive/fauxtography"   # dataset lives here already
+REPO = "/content/fauxtography"
+
+# Env overrides already write runs directly to Drive; this step is a safety
+# net that reconciles anything that landed in the repo clone, and confirms
+# both trees exist before the session may drop.
+def _sync_to_drive(name: str) -> None:
+    src = os.path.join(REPO, name)
+    dst = os.path.join(DRIVE_ROOT, name)
+    os.makedirs(dst, exist_ok=True)
+    print(f"--- {name} ---")
+    if os.path.isdir(src):
+        shutil.copytree(src, dst, dirs_exist_ok=True)   # keep newer files
+        print(f"synced from repo: {src}")
+    size = sum(
+        os.path.getsize(os.path.join(dp, f))
+        for dp, _, fns in os.walk(dst)
+        for f in fns
+    )
+    print(f"Drive {name} total: {size/1e6:.1f} MB -> {dst}")
+
+_sync_to_drive("experiments")
+_sync_to_drive("results")
+""",
+        ),
+        code(
+            """\
+!du -sh /content/drive/MyDrive/fauxtography/{experiments,results} 2>/dev/null
+!echo "--- top-level of each ---" && ls /content/drive/MyDrive/fauxtography/experiments 2>/dev/null
+!ls /content/drive/MyDrive/fauxtography/results 2>/dev/null
 """,
         ),
         md(
