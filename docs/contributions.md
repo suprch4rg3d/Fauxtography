@@ -91,9 +91,36 @@ Two defensible outcomes, both contributions:
 Either way the report must say clearly *what the paper knew* and *what we
 added*, never implying the experiment itself is novel.
 
+## Contribution 4 - cross-model fusion and disagreement
+
+We produce predictions from three model families (supervised CNN, frozen
+self-supervised ViT + probe, zero-shot CLIP) on the same sets. Majority-vote
+fusion and the disagreement map show whether the families are redundant or
+complementary. The finding is *which pair of families cooperates* and where
+the zero-shot model's priors split from the trained models. Command:
+`fauxtography analyze-fusion`.
+
+## Contribution 5 - is the compression short-cut causal?
+
+The file-size probe (corpus stats, 112 KB real vs 447 KB fake) is only a
+correlation. The recompress-and-eval probe re-encodes both classes to a
+similar file size, re-extracts frozen DINOv2 features and re-scores the
+unchanged probe (`fauxtography probe-compression`). If accuracy collapses,
+the detector was reading the size gap, not the pixels - a causal statement
+about the GenImage short-cut, not just an observation.
+
+## Contribution 6 - feature geometry
+
+DINOv2 features projected with PCA->TSNE and colored by generator
+(`fauxtography visualize-features`). Shows whether the cross-generator
+collapse is visible in the representation itself (generators form separate
+clusters even before any head is trained).
+
 ## What is NOT a contribution (keep out of claims)
 
 - Running the cross-generator experiment on GenImage: reproduction.
 - Same-generator accuracy: reproduction at smaller scale.
 - The exact accuracies: numbers, not findings. The finding is the *relative
   behaviour across models and generators*.
+- File-size correlations without the recompress experiment: observation, not
+  cause. Only cite the causal probe as a contribution.
