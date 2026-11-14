@@ -522,8 +522,12 @@ Drive via the env vars above.
         ),
         code(
             """\
-# Baseline - fine-tune the shared ResNet (joint)
+# Baseline - fine-tune the shared ResNet (joint), then score the same
+# cross-generator sets with the trained checkpoint (no retraining) and
+# measure the file-size shortcut.
 !/content/fxt-venv/bin/fauxtography train-baseline
+!/content/fxt-venv/bin/fauxtography eval-cross --model baseline
+!/content/fxt-venv/bin/fauxtography probe-file-size
 """,
         ),
         code(
@@ -543,6 +547,14 @@ print("SKIPPED: CLIP eval-clip not implemented yet (see docs/milestones).")
 !/content/fxt-venv/bin/fauxtography extract-dinov2
 !/content/fxt-venv/bin/fauxtography train-linear-probe
 !/content/fxt-venv/bin/fauxtography eval-cross
+
+# Follow-up analyses (same probe + cached features, no extra training):
+#   - probe-compression: re-encode the held-out test to match real files sizes
+#     and re-evaluate - is the accuracy partly a file-size shortcut?
+#   - visualize-features: TSNE of the DINOv2 features colored by generator.
+!/content/fxt-venv/bin/fauxtography probe-compression
+!/content/fxt-venv/bin/fauxtography visualize-features
+!/content/fxt-venv/bin/fauxtography analyze-fusion
 """,
         ),
         md(
