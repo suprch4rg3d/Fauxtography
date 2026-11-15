@@ -1,0 +1,43 @@
+{
+  "probe": "recompress-and-eval (compression short-cut test)",
+  "source": "test",
+  "variant": "canonical",
+  "target_bytes": 127198,
+  "median_bytes_before": {
+    "real": 127198,
+    "fake": 458174
+  },
+  "median_bytes_after": {
+    "real": 86928,
+    "fake": 95027
+  },
+  "accuracy": 0.8678333333333333,
+  "n_samples": 12000,
+  "classification_report": {
+    "real": {
+      "precision": 0.8824956672443675,
+      "recall": 0.8486666666666667,
+      "f1-score": 0.865250637213254,
+      "support": 6000.0
+    },
+    "fake": {
+      "precision": 0.8542536115569823,
+      "recall": 0.887,
+      "f1-score": 0.8703188879803762,
+      "support": 6000.0
+    },
+    "accuracy": 0.8678333333333333,
+    "macro avg": {
+      "precision": 0.8683746394006748,
+      "recall": 0.8678333333333333,
+      "f1-score": 0.8677847625968151,
+      "support": 12000.0
+    },
+    "weighted avg": {
+      "precision": 0.8683746394006748,
+      "recall": 0.8678333333333333,
+      "f1-score": 0.8677847625968153,
+      "support": 12000.0
+    }
+  }
+}
