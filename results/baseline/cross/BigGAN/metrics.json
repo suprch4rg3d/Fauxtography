@@ -1,0 +1,34 @@
+{
+  "generator": "BigGAN",
+  "model": "baseline",
+  "variant": "resnet18",
+  "accuracy": 0.495,
+  "n_samples": 2000,
+  "classification_report": {
+    "real": {
+      "precision": 0.49742002063983487,
+      "recall": 0.964,
+      "f1-score": 0.6562287270251872,
+      "support": 1000.0
+    },
+    "fake": {
+      "precision": 0.41935483870967744,
+      "recall": 0.026,
+      "f1-score": 0.04896421845574388,
+      "support": 1000.0
+    },
+    "accuracy": 0.495,
+    "macro avg": {
+      "precision": 0.45838742967475615,
+      "recall": 0.495,
+      "f1-score": 0.3525964727404655,
+      "support": 2000.0
+    },
+    "weighted avg": {
+      "precision": 0.45838742967475615,
+      "recall": 0.495,
+      "f1-score": 0.35259647274046557,
+      "support": 2000.0
+    }
+  }
+}

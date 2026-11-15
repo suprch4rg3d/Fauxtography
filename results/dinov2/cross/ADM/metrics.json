@@ -1,0 +1,34 @@
+{
+  "generator": "ADM",
+  "model": "dinov2",
+  "variant": "canonical",
+  "accuracy": 0.51,
+  "n_samples": 2000,
+  "classification_report": {
+    "real": {
+      "precision": 0.5058962264150944,
+      "recall": 0.858,
+      "f1-score": 0.6364985163204748,
+      "support": 1000.0
+    },
+    "fake": {
+      "precision": 0.5328947368421053,
+      "recall": 0.162,
+      "f1-score": 0.24846625766871167,
+      "support": 1000.0
+    },
+    "accuracy": 0.51,
+    "macro avg": {
+      "precision": 0.5193954816285998,
+      "recall": 0.51,
+      "f1-score": 0.44248238699459325,
+      "support": 2000.0
+    },
+    "weighted avg": {
+      "precision": 0.5193954816285998,
+      "recall": 0.51,
+      "f1-score": 0.44248238699459325,
+      "support": 2000.0
+    }
+  }
+}

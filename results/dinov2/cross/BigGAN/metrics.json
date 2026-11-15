@@ -1,0 +1,34 @@
+{
+  "generator": "BigGAN",
+  "model": "dinov2",
+  "variant": "canonical",
+  "accuracy": 0.5545,
+  "n_samples": 2000,
+  "classification_report": {
+    "real": {
+      "precision": 0.5328511151295962,
+      "recall": 0.884,
+      "f1-score": 0.6649116209101166,
+      "support": 1000.0
+    },
+    "fake": {
+      "precision": 0.6598240469208211,
+      "recall": 0.225,
+      "f1-score": 0.33557046979865773,
+      "support": 1000.0
+    },
+    "accuracy": 0.5545,
+    "macro avg": {
+      "precision": 0.5963375810252086,
+      "recall": 0.5545,
+      "f1-score": 0.5002410453543872,
+      "support": 2000.0
+    },
+    "weighted avg": {
+      "precision": 0.5963375810252086,
+      "recall": 0.5545,
+      "f1-score": 0.5002410453543871,
+      "support": 2000.0
+    }
+  }
+}

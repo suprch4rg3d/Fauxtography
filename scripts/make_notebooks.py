@@ -439,10 +439,17 @@ import os
 venv = "/content/fxt-venv"
 repo = "/content/fauxtography"
 os.chdir(repo)
-DATA_ROOT = "/content/drive/MyDrive/fauxtography/data"     # WHERE IS YOUR DATASET?
-RUN_DIR = "/content/drive/MyDrive/fauxtography/experiments"   # checkpoints / features
-RESULTS_DIR = "/content/drive/MyDrive/fauxtography/results"   # committed metrics
-RAW_DIR = "/content/drive/MyDrive/fauxtography/data/raw"   # raw/ test lives here
+DRIVE = "/content/drive/MyDrive/fauxtography"   # dataset + experiments + results all HERE
+DATA_ROOT = os.path.join(DRIVE, "data")            # WHERE IS YOUR DATASET?
+RUN_DIR = os.path.join(DRIVE, "experiments")       # checkpoints / features
+RESULTS_DIR = os.path.join(DRIVE, "results")       # committed metrics
+RAW_DIR = os.path.join(DRIVE, "data", "raw")       # raw/ test lives here
+
+# Create every Drive folder NOW so outputs land there even if a command
+# runs before the download step, and so ``ls Drive`` never shows only data/.
+for _d in (DATA_ROOT, RUN_DIR, RESULTS_DIR, RAW_DIR,
+           os.path.join(RAW_DIR, "test"), os.path.join(RAW_DIR, "cross")):
+    os.makedirs(_d, exist_ok=True)
 
 # Export overrides - the CLI/package pick these up automatically.
 os.environ["FAUXTOGRAPHY_DATA_ROOT"] = DATA_ROOT
@@ -450,7 +457,10 @@ os.environ["FAUXTOGRAPHY_RUN_DIR"] = RUN_DIR
 os.environ["FAUXTOGRAPHY_RESULTS_DIR"] = RESULTS_DIR
 os.environ["FAUXTOGRAPHY_HELDOUT_TEST"] = os.path.join(RAW_DIR, "test")
 os.environ["FAUXTOGRAPHY_CROSS_DIR"] = os.path.join(RAW_DIR, "cross")
-print("configured:", DATA_ROOT)
+print("data       ->", DATA_ROOT)
+print("experiments->", RUN_DIR)
+print("results    ->", RESULTS_DIR)
+print("Drive folders ready:", sorted(os.listdir(DRIVE)))
 """
         ),
         md(
@@ -576,26 +586,28 @@ import shutil
 DRIVE_ROOT = "/content/drive/MyDrive/fauxtography"   # dataset lives here already
 REPO = "/content/fauxtography"
 
-# Env overrides already write runs directly to Drive; this step is a safety
-# net that reconciles anything that landed in the repo clone, and confirms
-# both trees exist before the session may drop.
-def _sync_to_drive(name: str) -> None:
+# Env overrides write runs directly to Drive (data/experiments/results all in
+# DRIVE_ROOT). This step guarantees both trees exist there even if a command
+# wrote into the repo clone instead, then reports sizes before the session
+# can drop. Runs are idempotent.
+def _tree_size(root):
+    return sum(
+        os.path.getsize(os.path.join(dp, f))
+        for dp, _, fns in os.walk(root) for f in fns
+    )
+
+def _ensure_on_drive(name):
     src = os.path.join(REPO, name)
     dst = os.path.join(DRIVE_ROOT, name)
     os.makedirs(dst, exist_ok=True)
-    print(f"--- {name} ---")
-    if os.path.isdir(src):
-        shutil.copytree(src, dst, dirs_exist_ok=True)   # keep newer files
-        print(f"synced from repo: {src}")
-    size = sum(
-        os.path.getsize(os.path.join(dp, f))
-        for dp, _, fns in os.walk(dst)
-        for f in fns
-    )
-    print(f"Drive {name} total: {size/1e6:.1f} MB -> {dst}")
+    if os.path.isdir(src) and os.listdir(src):
+        shutil.copytree(src, dst, dirs_exist_ok=True)   # repo -> Drive, keep newer
+    print(f"{name}: {_tree_size(dst)/1e6:.1f} MB -> {dst}")
 
-_sync_to_drive("experiments")
-_sync_to_drive("results")
+_ensure_on_drive("experiments")
+_ensure_on_drive("results")
+print("Saved next to data/ at", DRIVE_ROOT)
+print("Drive contents:", sorted(os.listdir(DRIVE_ROOT)))
 """,
         ),
         code(
