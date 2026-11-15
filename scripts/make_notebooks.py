@@ -576,45 +576,53 @@ recompressed mirrors) and the small committed **results** (json, svg, npy, csv)
 into the same Google Drive root where the dataset and its splits live:
 `/content/drive/MyDrive/fauxtography/`. Idempotent - rerunning only copies
 what is newer, so it is safe after a session drop too.
+
+The cell force-copies repo -> Drive (tqdm progress bar), drops `.ready` markers
+so the Drive web UI stops hiding empty folders, then **flushes + remounts** the
+drive so writes reach Google's servers immediately, and the final listing is
+read back from the cloud (ground truth) instead of the VM's local cache.
 """
         ),
         code(
             """\
 import os
 import shutil
+from tqdm import tqdm
 
-DRIVE_ROOT = "/content/drive/MyDrive/fauxtography"   # dataset lives here already
-REPO = "/content/fauxtography"
+DRIVE = "/content/drive/MyDrive/fauxtography"
+REPO  = "/content/fauxtography"
 
-# Env overrides write runs directly to Drive (data/experiments/results all in
-# DRIVE_ROOT). This step guarantees both trees exist there even if a command
-# wrote into the repo clone instead, then reports sizes before the session
-# can drop. Runs are idempotent.
-def _tree_size(root):
-    return sum(
-        os.path.getsize(os.path.join(dp, f))
-        for dp, _, fns in os.walk(root) for f in fns
-    )
-
-def _ensure_on_drive(name):
+# --- force-backup repo -> Drive (idempotent, with progress bar) ---
+for name in ("experiments", "results"):
     src = os.path.join(REPO, name)
-    dst = os.path.join(DRIVE_ROOT, name)
+    dst = os.path.join(DRIVE, name)
     os.makedirs(dst, exist_ok=True)
     if os.path.isdir(src) and os.listdir(src):
-        shutil.copytree(src, dst, dirs_exist_ok=True)   # repo -> Drive, keep newer
-    print(f"{name}: {_tree_size(dst)/1e6:.1f} MB -> {dst}")
+        files = [
+            (os.path.join(dp, f), os.path.relpath(os.path.join(dp, f), src))
+            for dp, _, fns in os.walk(src) for f in fns
+        ]
+        bar = tqdm(files, desc=f"backup {name} -> Drive", unit="file", leave=False)
+        for fp, rel in bar:
+            out = os.path.join(dst, rel)
+            os.makedirs(os.path.dirname(out), exist_ok=True)
+            shutil.copy2(fp, out)
+        bar.close()
+    # .ready markers: forces Drive's web UI to render otherwise-hidden folders
+    with open(os.path.join(dst, ".ready"), "w") as f:
+        f.write("")
+    size = sum(os.path.getsize(os.path.join(dp, f)) for dp, _, fs in os.walk(dst) for f in fs)
+    print(f"{name}: {size/1e6:.1f} MB")
 
-_ensure_on_drive("experiments")
-_ensure_on_drive("results")
-print("Saved next to data/ at", DRIVE_ROOT)
-print("Drive contents:", sorted(os.listdir(DRIVE_ROOT)))
-""",
-        ),
-        code(
-            """\
-!du -sh /content/drive/MyDrive/fauxtography/{experiments,results} 2>/dev/null
-!echo "--- top-level of each ---" && ls /content/drive/MyDrive/fauxtography/experiments 2>/dev/null
-!ls /content/drive/MyDrive/fauxtography/results 2>/dev/null
+# --- force the mount to push everything to Google's servers ---
+from google.colab import drive
+drive.flush_and_unmount()
+drive.mount('/content/drive')
+
+# --- ground truth: read back fresh from the cloud ---
+!ls -la /content/drive/MyDrive/fauxtography/
+print("experiments:", sorted(os.listdir("/content/drive/MyDrive/fauxtography/experiments")))
+print("results:    ", sorted(os.listdir("/content/drive/MyDrive/fauxtography/results")))
 """,
         ),
         md(
