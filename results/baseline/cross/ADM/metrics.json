@@ -1,0 +1,34 @@
+{
+  "generator": "ADM",
+  "model": "baseline",
+  "variant": "resnet18",
+  "accuracy": 0.491,
+  "n_samples": 2000,
+  "classification_report": {
+    "real": {
+      "precision": 0.4953560371517028,
+      "recall": 0.96,
+      "f1-score": 0.6535057862491491,
+      "support": 1000.0
+    },
+    "fake": {
+      "precision": 0.3548387096774194,
+      "recall": 0.022,
+      "f1-score": 0.04143126177024482,
+      "support": 1000.0
+    },
+    "accuracy": 0.491,
+    "macro avg": {
+      "precision": 0.4250973734145611,
+      "recall": 0.491,
+      "f1-score": 0.34746852400969697,
+      "support": 2000.0
+    },
+    "weighted avg": {
+      "precision": 0.42509737341456105,
+      "recall": 0.491,
+      "f1-score": 0.34746852400969697,
+      "support": 2000.0
+    }
+  }
+}
