@@ -1,0 +1,1 @@
+{"classes": ["cross_ADM:real", "cross_ADM:fake", "cross_BigGAN:real", "cross_BigGAN:fake", "cross_Midjourney:real", "cross_Midjourney:fake", "train:real", "train:fake"], "method": "PCA->TSNE", "n_points": 8000}

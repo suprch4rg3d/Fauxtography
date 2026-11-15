@@ -1,0 +1,26 @@
+[
+  {
+    "split": "internal",
+    "n_samples": 3000,
+    "fused_accuracy": 0.9387,
+    "model_accuracies": {
+      "baseline": 0.9703333333333334,
+      "dinov2": 0.8873333333333333
+    },
+    "pairwise_agreement": {
+      "baseline_vs_dinov2": 0.873
+    }
+  },
+  {
+    "split": "heldout",
+    "n_samples": 12000,
+    "fused_accuracy": 0.9288,
+    "model_accuracies": {
+      "baseline": 0.9665833333333333,
+      "dinov2": 0.8745833333333334
+    },
+    "pairwise_agreement": {
+      "baseline_vs_dinov2": 0.8597
+    }
+  }
+]

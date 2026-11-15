@@ -898,8 +898,10 @@ def cmd_visualize_features(args: argparse.Namespace) -> int:
 
     # Generators to color (split name -> display label). Cross sets are the
     # distinct generators; SD pool is the in-domain (real/fake) reference.
+    # Auto-discovered from the cache: cross_<gen>.pt stems carry the prefix,
+    # so strip it before re-prefixing (avoids cross_cross_<gen> lookups).
     generators = args.generators or sorted(
-        p.stem for p in feats_dir.glob("cross_*.pt")
+        p.stem[len("cross_"):] for p in feats_dir.glob("cross_*.pt")
     )
     splits = ["train"] + [f"cross_{g}" for g in generators] if generators else ["train"]
 
@@ -1053,23 +1055,28 @@ def _recompress_to_target(path: Path, out_path: Path, target_bytes: int) -> int:
     """Re-encode an image as JPEG so its file size lands near ``target_bytes``.
 
     Adjusts JPEG quality down until the encoded size fits the budget (or a
-    floor quality is hit), then saves to ``out_path``. Returns bytes written.
+    floor quality is hit), then writes exactly one final file to ``out_path``.
+
+    Trial encodings go to a ``.tmp`` name so they can never be picked up as
+    images: earlier versions wrote ``.qNN.jpg`` trial files that stayed on
+    disk and leaked into the dataset loader, silently inflating the sample
+    count (e.g. 15,701 vs the real 12,000).
     """
     from PIL import Image
 
     img = Image.open(path).convert("RGB")
     # Try progressively lower quality (min 10) to hit the budget.
+    trial = out_path.with_suffix(out_path.suffix + ".tmp")
     quality = 95
     for _ in range(12):
-        trial = out_path.with_suffix(f".q{quality}.jpg")
         img.save(trial, "JPEG", quality=quality)
         size = trial.stat().st_size
         if size <= target_bytes or quality <= 10:
-            trial.replace(out_path)
+            trial.replace(out_path)  # atomic: only final .jpg lands in the dir
             return size
         quality -= 8
-    # Fall back: best-effort copy.
-    img.save(out_path, "JPEG", quality=10)
+    # Fall back (should be unreachable: loop always returns above).
+    trial.replace(out_path)
     return out_path.stat().st_size
 
 
@@ -1086,6 +1093,7 @@ def cmd_probe_compression(args: argparse.Namespace) -> int:
     Outputs under results/dinov2/compression/.
     """
     import json
+    import shutil
 
     import numpy as np
     import torch
@@ -1136,7 +1144,13 @@ def cmd_probe_compression(args: argparse.Namespace) -> int:
         target = int(np.median(real_sizes))
 
     # Recompress into a run-dir mirror (git-ignored), variant-shaped cache.
+    # Wipe any previous mirror first. An earlier version of the recompressor
+    # leaked .qNN.jpg trial files that stayed in the folder and inflated the
+    # eval set (15,701 instead of 12,000); rebuilding from scratch keeps the
+    # mirror clean so the count matches the source set.
     mirror = Path(cfg.output.run_dir) / "dinov2" / "recompressed" / src.name
+    if mirror.exists():
+        shutil.rmtree(mirror)
     (mirror / "real").mkdir(parents=True, exist_ok=True)
     (mirror / "fake").mkdir(parents=True, exist_ok=True)
 

@@ -1,0 +1,79 @@
+{
+  "probe": "file-size threshold (fake > thr => fake)",
+  "threshold_bytes": 258262,
+  "threshold_kb": 252.2,
+  "train_accuracy": 0.9896,
+  "mean_size_bytes": {
+    "real_train": 115313.128,
+    "fake_train": 457624.3554285714,
+    "real_train_kb": 112.6,
+    "fake_train_kb": 446.9
+  },
+  "sets": [
+    {
+      "name": "train",
+      "n_samples": 14000,
+      "n_real": 7000,
+      "n_fake": 7000,
+      "accuracy": 0.9896,
+      "confusion": {
+        "tn_real": 6865,
+        "fp_real": 135,
+        "fn_fake": 11,
+        "tp_fake": 6989
+      }
+    },
+    {
+      "name": "test",
+      "n_samples": 12000,
+      "n_real": 6000,
+      "n_fake": 6000,
+      "accuracy": 0.9873,
+      "confusion": {
+        "tn_real": 5861,
+        "fp_real": 139,
+        "fn_fake": 13,
+        "tp_fake": 5987
+      }
+    },
+    {
+      "name": "ADM",
+      "n_samples": 2000,
+      "n_real": 1000,
+      "n_fake": 1000,
+      "accuracy": 0.4885,
+      "confusion": {
+        "tn_real": 977,
+        "fp_real": 23,
+        "fn_fake": 1000,
+        "tp_fake": 0
+      }
+    },
+    {
+      "name": "BigGAN",
+      "n_samples": 2000,
+      "n_real": 1000,
+      "n_fake": 1000,
+      "accuracy": 0.4865,
+      "confusion": {
+        "tn_real": 973,
+        "fp_real": 27,
+        "fn_fake": 1000,
+        "tp_fake": 0
+      }
+    },
+    {
+      "name": "Midjourney",
+      "n_samples": 2000,
+      "n_real": 1000,
+      "n_fake": 1000,
+      "accuracy": 0.9885,
+      "confusion": {
+        "tn_real": 978,
+        "fp_real": 22,
+        "fn_fake": 1,
+        "tp_fake": 999
+      }
+    }
+  ]
+}
