@@ -22,7 +22,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "ruff>=0.6"]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+    "ipykernel>=6.29",   # run the analysis notebooks locally (Jupyter kernel)
+]
 
 [project.scripts]
 fauxtography = "fauxtography.cli:main"

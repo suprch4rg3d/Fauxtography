@@ -136,14 +136,18 @@ point) on the cross-generator sets under `data/raw/cross/<generator>/`
 poetry run fauxtography eval-cross
 ```
 
-Expected output table (SD v1.4-trained; ours upcoming):
+Result table (SD v1.4-trained probe, no retraining for the cross rows):
 
 | Tested on   | Paper ResNet-50 | Ours (DINOv2) |
 |-------------|-----------------|---------------|
-| SD v1.4     | ~99.9%          | ~88.7%        |
-| Midjourney  | ~54.9%          | TBD           |
-| ADM         | ~53.5%          | TBD           |
-| BigGAN      | ~52.0%          | TBD           |
+| SD v1.4     | ~99.9%          | 0.8746 heldout|
+| Midjourney  | ~54.9%          | 0.8205        |
+| ADM         | ~53.5%          | 0.5100        |
+| BigGAN      | ~52.0%          | 0.5545        |
+
+All cross rows are 2,000 images (1,000 real + 1,000 fake); 0.50 is chance.
+Numbers come from `results/dinov2/cross/<generator>/metrics.json` (committed
+L4 run).
 
 ### Why this is the most valuable experiment we can run
 
@@ -168,6 +172,9 @@ Both are defensible, interesting conclusions for the report.
 
 ## 8. References
 
+- Dataset + cross-generator baselines: "GenImage: A Million-Scale Benchmark
+  for Detecting AI-Generated Image" (Zhu et al., NeurIPS 2023 Datasets and
+  Benchmarks Track, arXiv:2306.08571). Formal BibTeX: `references.bib`.
 - DINOv2 paper: "DINOv2: Learning Robust Visual Features without Supervision"
   (Oquab et al., 2023)
 - The DINO self-supervised method it builds on: "Emerging Properties in

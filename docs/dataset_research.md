@@ -1,6 +1,6 @@
 # Dataset Research
 
-**MAI644 Computer Vision - Semester Group Project (Fauxtography)**
+**Semester group project for MAI644 - Computer Vision, M.Sc. in Artificial Intelligence, University of Cyprus, 2026.**
 
 This note documents the dataset selection for the project: detecting AI-generated
 images vs real photographs, comparing a ResNet baseline, CLIP zero-shot and
@@ -207,7 +207,27 @@ listed in the references below. Mitigations to consider in the analysis:
 
 - GenImage: A Million-Scale Benchmark for Detecting AI-Generated Image.
   Zhu, Chen, Yan, Huang, Lin, Li, Tu, Hu, Hu, Wang (Huawei Noah's Ark Lab).
-  NeurIPS 2023. arXiv:2306.08571.
+  NeurIPS 2023 (Datasets and Benchmarks Track), arXiv:2306.08571.
+  Formal BibTeX: `../../references.bib` (also below).
+
+```bibtex
+@inproceedings{zhu2023genimage,
+  title        = {GenImage: A Million-Scale Benchmark for Detecting
+                  AI-Generated Image},
+  author       = {Zhu, Mingjian and Chen, Hanting and Yan, Qiangyu and
+                  Huang, Xudong and Lin, Guanyu and Li, Wei and Tu, Zhijun
+                  and Hu, Hailin and Hu, Jie and Wang, Yunhe},
+  booktitle    = {Advances in Neural Information Processing Systems 36
+                  (NeurIPS 2023) Datasets and Benchmarks Track},
+  year         = {2023},
+  howpublished = {arXiv:2306.08571},
+  url          = {https://arxiv.org/abs/2306.08571},
+  eprint       = {2306.08571},
+  archivePrefix= {arXiv},
+  primaryClass = {cs.CV}
+}
+```
+
 - Project homepage / GitHub: `github.com/GenImage-Dataset/GenImage`
   (Google Drive download; per-generator Arrow mirror on Hugging Face).
 - Related bias analysis: "Fake or JPEG? Revealing Common Biases in Generated
