@@ -1,6 +1,6 @@
 # Work Division
 
-**Semester Group Project - MAI644 Computer Vision.**
+**Semester group project for MAI644 - Computer Vision, M.Sc. in Artificial Intelligence, University of Cyprus, 2026.**
 
 Two collaborators, one model each plus its written analysis. Joint analysis is
 also split so both contribute to the final report and presentation.
