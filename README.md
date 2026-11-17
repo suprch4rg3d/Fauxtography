@@ -1,6 +1,7 @@
 # Fauxtography - Detecting AI-Generated Images
 
-**Semester Group Project - MAI644 Computer Vision.**
+**Semester group project for MAI644 - Computer Vision, M.Sc. in Artificial
+Intelligence, University of Cyprus, 2026.**
 
 Distinguish whether an image is a **real photograph** or an **AI-generated image**,
 by comparing three approaches on a shared test set:
@@ -145,14 +146,25 @@ data path for no benefit here.
 
 Scaffolding is complete: package, configs, shared data pipeline, CLI,
 device/path infra, Colab setup notebook, and analysis notebooks are in place.
-The **model implementations are intentionally stubbed**
-(`NotImplementedError`) - they are filled in per owner as the milestones land,
-and the stub contracts already define their inputs/outputs (labels
-`0=real, 1=fake`) so each half drops in without touching the other's code.
+The baseline (ResNet fine-tune) and DINOv2 + linear probe are implemented
+and have committed results under `results/baseline/` and `results/dinov2/`.
+The `eval-clip` command is still a stub on `dev`/`main` while CLIP's prompt
+sweep lands on its own branch from `dev` - the stub contracts already fix
+the inputs/outputs (labels `0=real, 1=fake`), so CLIP drops in without
+touching the rest.
+
+A new model joins the same way: config + `models/<name>.py` + a CLI
+command writing `results/<name>/`, then the analysis notebook (see
+"Adding another model" below).
 
 Notes:
-- `notebooks/` are generated from templates via `scripts/make_notebooks.py`;
-  edit templates and re-run, don't hand-edit the JSON.
+- `notebooks/fauxtography-on-colab.ipynb`, `00_data_overview.ipynb` and
+  `final_report.ipynb` are generated from `scripts/make_notebooks.py`; edit
+  templates and re-run, don't hand-edit the JSON.
+- `analysis_clip.ipynb` and `analysis_dinov2.ipynb` are hand-maintained:
+  their content and figures live in the notebook files themselves, and the
+  generators for them are commented out in `make_notebooks.py` so that
+  regenerating never silently replaces the written-up analysis.
 
 ---
 
@@ -163,6 +175,37 @@ Notes:
   Colab GPU.
 - Path overrides via env vars (set once redirects every command):
   `FAUXTOGRAPHY_DATA_ROOT`, `FAUXTOGRAPHY_RUN_DIR`, `FAUXTOGRAPHY_RESULTS_DIR`.
+
+<a name="contributing"></a>
+
+## Adding another model (open to contributors)
+
+The project's wider aim is a **reference point**: a repo where, for each
+foundation model, anyone can reproduce the numbers, rerun the eval, and add
+or swap models without touching the comparison machinery. The dataset
+splits and seeds are fixed, results are committed, and the comparison table
+is cheap to re-run, so both *rerunning the repo* and *dropping in a newer
+model* are contributions that keep the table meaningful.
+
+The repo is set up so a new foundation model drops in by following an
+existing one - the comparison is a growing table, not a fixed one. The
+pattern, one file at a time:
+
+1. `configs/<model>.yaml` - model settings (copy `configs/dinov2.yaml`).
+2. `src/fauxtography/models/<model>.py` - a wrapper exposing the model
+   (copy `models/dinov2.py`; the stub contracts already fix the
+   inputs/outputs: labels `0=real, 1=fake`).
+3. A CLI command in `cli.py` that writes `results/<model>/` (metrics JSON
+   + figures). `compare` and `analyze-fusion` read that layout
+   automatically, so a new model joins the comparison table and the
+   ensemble without touching them.
+4. `notebooks/analysis_<model>.ipynb` - the verdict, written from the
+   committed results (see `notebooks/analysis_dinov2.ipynb` as the
+   template).
+
+How a model and its analysis are owned: `docs/work_division.md`. What a
+new model family adds to the comparison - and what is not a contribution:
+`docs/contributions.md`.
 
 ## Git workflow
 

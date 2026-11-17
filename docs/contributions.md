@@ -49,15 +49,18 @@ cross-generator collapse about the generator, the model, or the task?"
 ## Contribution 2 - the comparison axis
 
 Because we re-use GenImage's SD v1.4 test sets, our numbers line up
-column-by-column with the paper's published ResNet-50 row. The intended
-comparison table (values TBD until the cross-generator runs land):
+column-by-column with the paper's published ResNet-50 row. Current table
+(cross rows from the committed L4 run; CLIP pending its prompt sweep):
 
 | Tested on | Paper ResNet-50 | Our ResNet | DINOv2 | CLIP |
 |-----------|-----------------|------------|--------|------|
-| SD v1.4   | ~99.9%          | ~97%       | ~88.7% | ~67% |
-| Midjourney| ~54.9%          | TBD        | TBD    | TBD  |
-| ADM       | ~53.5%          | TBD        | TBD    | TBD  |
-| BigGAN    | ~52.0%          | TBD        | TBD    | TBD  |
+| SD v1.4*  | ~99.9%          | 0.9666     | 0.8746 | TBD  |
+| Midjourney| ~54.9%          | 0.5945     | 0.8205 | TBD  |
+| ADM       | ~53.5%          | 0.4910     | 0.5100 | TBD  |
+| BigGAN    | ~52.0%          | 0.4950     | 0.5545 | TBD  |
+
+\* SD row = heldout accuracy for our models. Cross rows are 2,000 images
+(1,000 real + 1,000 fake), 0.50 = chance.
 
 If CLIP results are not available or not merged, publish the three-column
 version (paper / ResNet / DINOv2) and keep CLIP's row as "work in progress"
