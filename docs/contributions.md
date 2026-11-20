@@ -50,21 +50,24 @@ cross-generator collapse about the generator, the model, or the task?"
 
 Because we re-use GenImage's SD v1.4 test sets, our numbers line up
 column-by-column with the paper's published ResNet-50 row. Current table
-(cross rows from the committed L4 run; CLIP pending its prompt sweep):
+(CLIP row = zero-shot; its cross-generator runs are not yet committed):
 
-| Tested on | Paper ResNet-50 | Our ResNet | DINOv2 | CLIP |
-|-----------|-----------------|------------|--------|------|
-| SD v1.4*  | ~99.9%          | 0.9666     | 0.8746 | TBD  |
-| Midjourney| ~54.9%          | 0.5945     | 0.8205 | TBD  |
-| ADM       | ~53.5%          | 0.4910     | 0.5100 | TBD  |
-| BigGAN    | ~52.0%          | 0.4950     | 0.5545 | TBD  |
+| Tested on | Paper ResNet-50 | Our ResNet | DINOv2 | CLIP (zero-shot) |
+|-----------|-----------------|------------|--------|------------------|
+| SD v1.4*  | ~99.9%          | 0.9666     | 0.8746 | 0.6647           |
+| Midjourney| ~54.9%          | 0.5945     | 0.8205 | TBD              |
+| ADM       | ~53.5%          | 0.4910     | 0.5100 | TBD              |
+| BigGAN    | ~52.0%          | 0.4950     | 0.5545 | TBD              |
 
 \* SD row = heldout accuracy for our models. Cross rows are 2,000 images
 (1,000 real + 1,000 fake), 0.50 = chance.
 
-If CLIP results are not available or not merged, publish the three-column
-version (paper / ResNet / DINOv2) and keep CLIP's row as "work in progress"
-or drop it - do not fabricate or over-draw it.
+CLIP internal (same-split) accuracy is 0.6650 (n=3000), heldout 0.6647
+(n=12000), from the combined prompt ensemble (6 real + 6 fake). Read CLIP's
+column as the off-the-shelf zero-shot reference point: it never trains on
+GenImage, so it is not an equal-footing competitor for the tuned models.
+The cross-generator CLIP cells are not yet run - keep them TBD and do not
+fabricate or over-draw them.
 
 Caveat to state honestly: our same-generator numbers are lower than the
 paper's 99.9% because we train on a much smaller slice (~7k fake images per

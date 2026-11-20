@@ -2,25 +2,31 @@
   {
     "split": "internal",
     "n_samples": 3000,
-    "fused_accuracy": 0.9387,
+    "fused_accuracy": 0.94,
     "model_accuracies": {
       "baseline": 0.9703333333333334,
-      "dinov2": 0.8873333333333333
+      "dinov2": 0.8873333333333333,
+      "clip": 0.665
     },
     "pairwise_agreement": {
-      "baseline_vs_dinov2": 0.873
+      "baseline_vs_dinov2": 0.873,
+      "baseline_vs_clip": 0.6513,
+      "dinov2_vs_clip": 0.653
     }
   },
   {
     "split": "heldout",
     "n_samples": 12000,
-    "fused_accuracy": 0.9288,
+    "fused_accuracy": 0.9285,
     "model_accuracies": {
       "baseline": 0.9665833333333333,
-      "dinov2": 0.8745833333333334
+      "dinov2": 0.8745833333333334,
+      "clip": 0.6646666666666666
     },
     "pairwise_agreement": {
-      "baseline_vs_dinov2": 0.8597
+      "baseline_vs_dinov2": 0.8597,
+      "baseline_vs_clip": 0.6552,
+      "dinov2_vs_clip": 0.6558
     }
   }
 ]
