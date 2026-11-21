@@ -134,7 +134,16 @@ point) on the cross-generator sets under `data/raw/cross/<generator>/`
 
 ```
 poetry run fauxtography eval-cross
+poetry run fauxtography eval-cross --model baseline
+poetry run fauxtography eval-cross --model clip
 ```
+
+The same command scores the other model families: the fine-tuned ResNet
+(`--model baseline`, no retraining) and zero-shot CLIP (`--model clip`, no
+checkpoint at all). CLIP's cross rows are a slightly different question than
+the trained models' - it was never trained on any generator - but they
+answer whether zero-shot discrimination survives generator change, and they
+fill the CLIP cells the comparison table leaves TBD until run.
 
 Result table (SD v1.4-trained probe, no retraining for the cross rows):
 

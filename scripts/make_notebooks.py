@@ -546,7 +546,10 @@ Drive via the env vars above.
 # plus the official held-out test (balanced-descriptions prompts per
 # configs/clip.yaml, her best strategy from the prompt sweep). Results land
 # under results/clip/ (canonical) and results/clip/<strategy>/ (sweep).
+# eval-cross --model clip additionally scores the Midjourney / ADM / BigGAN
+# sets (no training, no checkpoint) into results/clip/cross/<generator>/.
 !/content/fxt-venv/bin/fauxtography eval-clip
+!/content/fxt-venv/bin/fauxtography eval-cross --model clip
 """,
         ),
         code(

@@ -246,3 +246,93 @@ def test_probe_file_size_measures_shortcut(tmp_path, monkeypatch):
     assert data["sets"][0]["accuracy"] == 1.0  # train set
     heldout_set = [s for s in data["sets"] if s["name"] == "heldout_test"]
     assert heldout_set and heldout_set[0]["accuracy"] == 1.0
+
+
+def _clip_yaml(tmp_path):
+    return {
+        "name": "clip",
+        "model_name": "openai/clip-vit-base-patch32",
+        "batch_size": 4,
+        "num_workers": 0,
+        "prompts_real": ["a real photograph"],
+        "prompts_fake": ["an AI-generated image"],
+        "data": {
+            "root": str(tmp_path / "data"),
+            "image_size": 32,
+            "num_workers": 0,
+            "seed": 42,
+            "cross_dir": str(tmp_path / "cross"),
+        },
+        "output": {
+            "run_dir": str(tmp_path / "exp" / "runs"),
+            "results_dir": str(tmp_path / "results"),
+            "report_name": "metrics",
+        },
+    }
+
+
+class _FakeClip:
+    """Stand-in for CLIPZeroShot: labels everything 'real' deterministically.
+
+    Avoids downloading CLIP weights; exercising the eval-cross wiring only.
+    """
+
+    def __init__(self, config, device="auto"):
+        self.text_features = None
+
+    def predict(self, images):
+        import torch
+
+        preds = torch.zeros(images.shape[0], dtype=torch.long)
+        probs = torch.tensor([[1.0, 0.0]] * images.shape[0])
+        return preds, probs
+
+
+def test_eval_cross_clip_writes_outputs(tmp_path, monkeypatch):
+    """CLIP branch: fake CLIPZeroShot + tiny images, no transformers download."""
+    from PIL import Image
+
+    import fauxtography.models.clip as clip_mod
+
+    monkeypatch.setattr(clip_mod, "CLIPZeroShot", _FakeClip)
+    for var in (
+        "FAUXTOGRAPHY_DATA_ROOT",
+        "FAUXTOGRAPHY_RUN_DIR",
+        "FAUXTOGRAPHY_RESULTS_DIR",
+        "FAUXTOGRAPHY_HELDOUT_TEST",
+        "FAUXTOGRAPHY_CROSS_DIR",
+        "FAUXTOGRAPHY_RAW_DIR",
+    ):
+        monkeypatch.delenv(var, raising=False)
+
+    cfg_yaml = _clip_yaml(tmp_path)
+    config_path = tmp_path / "clip.yaml"
+    config_path.write_text(yaml.safe_dump(cfg_yaml))
+
+    for gen in ("Midjourney", "ADM", "BigGAN"):
+        for cls in ("real", "fake"):
+            folder = tmp_path / "cross" / gen / cls
+            folder.mkdir(parents=True)
+            for i in range(2):
+                Image.new("RGB", (32, 32), (200, 200, 200)).save(
+                    folder / f"{gen}{cls}{i}.jpg"
+                )
+
+    class _NS:
+        config = config_path
+        model = "clip"
+
+    rc = cmd_eval_cross(_NS())
+    assert rc == 0
+
+    for gen in ("Midjourney", "ADM", "BigGAN"):
+        out = tmp_path / "results" / "clip" / "cross" / gen
+        assert (out / "metrics.json").is_file(), f"missing metrics for {gen}"
+        assert (out / "confusion_matrix.svg").is_file()
+        data = json.loads((out / "metrics.json").read_text())
+        assert data["model"] == "clip"
+        assert data["generator"] == gen
+        assert data["variant"] == "openai/clip-vit-base-patch32"
+        assert data["n_samples"] == 4
+        # Everything labelled real -> accuracy = P(real) = 0.5 at 4 samples.
+        assert data["accuracy"] == 0.5
