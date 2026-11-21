@@ -1,3 +1,3 @@
 split,n_samples,fused_accuracy,model_accuracies,pairwise_agreement
-internal,3000,0.9387,"{""baseline"": 0.9703333333333334, ""dinov2"": 0.8873333333333333}","{""baseline_vs_dinov2"": 0.873}"
-heldout,12000,0.9288,"{""baseline"": 0.9665833333333333, ""dinov2"": 0.8745833333333334}","{""baseline_vs_dinov2"": 0.8597}"
+internal,3000,0.9483,"{""baseline"": 0.9703333333333334, ""dinov2"": 0.8873333333333333, ""clip"": 0.713}","{""baseline_vs_dinov2"": 0.873, ""baseline_vs_clip"": 0.704, ""dinov2_vs_clip"": 0.681}"
+heldout,12000,0.9392,"{""baseline"": 0.9665833333333333, ""dinov2"": 0.8745833333333334, ""clip"": 0.7276666666666667}","{""baseline_vs_dinov2"": 0.8597, ""baseline_vs_clip"": 0.7186, ""dinov2_vs_clip"": 0.6931}"

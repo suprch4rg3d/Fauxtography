@@ -146,12 +146,11 @@ data path for no benefit here.
 
 Scaffolding is complete: package, configs, shared data pipeline, CLI,
 device/path infra, Colab setup notebook, and analysis notebooks are in place.
-The baseline (ResNet fine-tune) and DINOv2 + linear probe are implemented
-and have committed results under `results/baseline/` and `results/dinov2/`.
-The `eval-clip` command is still a stub on `dev`/`main` while CLIP's prompt
-sweep lands on its own branch from `dev` - the stub contracts already fix
-the inputs/outputs (labels `0=real, 1=fake`), so CLIP drops in without
-touching the rest.
+All three models (ResNet fine-tune, DINOv2 + linear probe, CLIP zero-shot)
+are implemented and have committed results under `results/baseline/`,
+`results/dinov2/`, and `results/clip/`. CLIP's canonical result is its best
+prompt strategy ("balanced descriptions", heldout 0.7277); the full prompt
+sweep lives under `results/clip/<strategy>/`.
 
 A new model joins the same way: config + `models/<name>.py` + a CLI
 command writing `results/<name>/`, then the analysis notebook (see
