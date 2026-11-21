@@ -8,7 +8,7 @@ console script:
     poetry run fauxtography eval-clip
     poetry run fauxtography extract-dinov2
     poetry run fauxtography train-linear-probe
-    poetry run fauxtography eval-cross --model dinov2|baseline
+    poetry run fauxtography eval-cross --model dinov2|baseline|clip
     poetry run fauxtography probe-file-size
     poetry run fauxtography probe-compression
     poetry run fauxtography visualize-features
@@ -799,17 +799,87 @@ def _eval_cross_baseline(args: argparse.Namespace) -> int:
     return 0
 
 
+def _eval_cross_clip(args: argparse.Namespace) -> int:
+    """Score zero-shot CLIP against cross-generator sets.
+
+    No training and no checkpoint: the same frozen CLIP + text prompts from
+    the main run are applied directly to Midjourney / ADM / BigGAN fakes
+    (and the shared real side). Unlike the trained models, CLIP has no
+    generator-specific artifacts to memorize, so its cross rows test whether
+    zero-shot discrimination survives generator change - a different
+    question than the paper's train-SD-test-other cliff.
+    """
+    import numpy as np
+    from torch.utils.data import DataLoader
+
+    from .config import load_config
+    from .data.dataset import FauxtoDataset
+    from .data.transforms import clip_transforms
+    from .models.clip import CLIPZeroShot
+    from .utils.device import get_device
+    from .utils.seed import set_seed
+
+    cfg = load_config("clip", args.config)
+    set_seed(cfg.data.seed)
+    device = get_device()
+    model = CLIPZeroShot(cfg, device=device)
+    transform = clip_transforms(cfg.data.image_size).eval_transform
+
+    generators = _discover_cross_generators(Path(cfg.data.cross_dir))
+    logger.info(
+        "CLIP cross-gen eval: %s on %s, generators=%s",
+        cfg.model_name,
+        device,
+        generators,
+    )
+
+    results_root = Path(cfg.output.results_dir) / "clip" / "cross"
+    results_root.mkdir(parents=True, exist_ok=True)
+
+    for gen in generators:
+        ds = FauxtoDataset(Path(cfg.data.cross_dir) / gen, transform=transform)
+        loader = DataLoader(
+            ds,
+            batch_size=cfg.batch_size,
+            shuffle=False,
+            num_workers=cfg.num_workers,
+            pin_memory=device.type == "cuda",
+        )
+        y_true, y_pred = [], []
+        for images, labels in loader:
+            preds, _probs = model.predict(images)
+            y_true.extend(labels.tolist())
+            y_pred.extend(preds.cpu().tolist())
+        _write_cross_result(
+            results_root / gen,
+            gen,
+            "clip",
+            cfg.model_name,
+            np.asarray(y_true),
+            np.asarray(y_pred),
+        )
+    return 0
+
+
 def cmd_eval_cross(args: argparse.Namespace) -> int:
-    """Score a trained model against the cross-generator sets.
+    """Score a model against the cross-generator sets.
 
     ``--model dinov2`` (default): the frozen DINOv2 backbone + linear probe.
     ``--model baseline``: the fine-tuned ResNet checkpoint.
+    ``--model clip``: zero-shot CLIP (no training, no checkpoint).
     """
-    cfg_default = DEFAULT_CONFIG["eval-cross"] if args.model == "dinov2" else DEFAULT_CONFIG["train-baseline"]
+    if args.model == "baseline":
+        cfg_default = DEFAULT_CONFIG["train-baseline"]
+    elif args.model == "clip":
+        cfg_default = DEFAULT_CONFIG["eval-clip"]
+    else:
+        cfg_default = DEFAULT_CONFIG["eval-cross"]
     args.config = Path(args.config) if args.config else Path(cfg_default)
 
     if args.model == "baseline":
         return _eval_cross_baseline(args)
+    if args.model == "clip":
+        return _eval_cross_clip(args)
     return _eval_cross_dinov2(args)
 
 
@@ -1397,7 +1467,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_compare)
 
     p = sub.add_parser("eval-cross", help="score a trained model on cross-generator sets")
-    p.add_argument("--model", default="dinov2", choices=["dinov2", "baseline"])
+    p.add_argument("--model", default="dinov2", choices=["dinov2", "baseline", "clip"])
     p.add_argument("--config", type=Path)
     p.set_defaults(func=cmd_eval_cross)
 
