@@ -50,11 +50,12 @@ cross-generator collapse about the generator, the model, or the task?"
 
 Because we re-use GenImage's SD v1.4 test sets, our numbers line up
 column-by-column with the paper's published ResNet-50 row. Current table
-(cross rows from the committed L4 run; CLIP pending its prompt sweep):
+(cross rows from the committed L4 run; CLIP row = heldout of its best prompt
+strategy, "balanced descriptions"):
 
 | Tested on | Paper ResNet-50 | Our ResNet | DINOv2 | CLIP |
 |-----------|-----------------|------------|--------|------|
-| SD v1.4*  | ~99.9%          | 0.9666     | 0.8746 | TBD  |
+| SD v1.4*  | ~99.9%          | 0.9666     | 0.8746 | 0.7277 |
 | Midjourney| ~54.9%          | 0.5945     | 0.8205 | TBD  |
 | ADM       | ~53.5%          | 0.4910     | 0.5100 | TBD  |
 | BigGAN    | ~52.0%          | 0.4950     | 0.5545 | TBD  |
@@ -62,9 +63,14 @@ column-by-column with the paper's published ResNet-50 row. Current table
 \* SD row = heldout accuracy for our models. Cross rows are 2,000 images
 (1,000 real + 1,000 fake), 0.50 = chance.
 
-If CLIP results are not available or not merged, publish the three-column
-version (paper / ResNet / DINOv2) and keep CLIP's row as "work in progress"
-or drop it - do not fabricate or over-draw it.
+CLIP numbers come from a prompt sweep (all strategies committed under
+`results/clip/<strategy>/`, same images per split). Best on heldout:
+"balanced descriptions" (internal 0.7130 / heldout 0.7277), which is the
+active config. The pre-sweep "original baseline" prompts scored 0.6650 /
+0.6647, and the whole sweep ranges from 0.48 to 0.73 - prompt wording
+matters for zero-shot CLIP at least as much as the backbone. The cross-
+generator CLIP cells are not yet run - keep them TBD and do not fabricate
+or over-draw them.
 
 Caveat to state honestly: our same-generator numbers are lower than the
 paper's 99.9% because we train on a much smaller slice (~7k fake images per

@@ -542,10 +542,11 @@ Drive via the env vars above.
         ),
         code(
             """\
-# CLIP zero-shot - DemetraP20. NOT IMPLEMENTED YET.
-# Uncomment (remove the leading #) once eval-clip is implemented.
-# !/content/fxt-venv/bin/fauxtography eval-clip
-print("SKIPPED: CLIP eval-clip not implemented yet (see docs/milestones).")
+# CLIP zero-shot - DemetraP20, implemented. Scores the internal test split
+# plus the official held-out test (balanced-descriptions prompts per
+# configs/clip.yaml, her best strategy from the prompt sweep). Results land
+# under results/clip/ (canonical) and results/clip/<strategy>/ (sweep).
+!/content/fxt-venv/bin/fauxtography eval-clip
 """,
         ),
         code(
