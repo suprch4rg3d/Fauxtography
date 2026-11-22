@@ -157,13 +157,14 @@ command writing `results/<name>/`, then the analysis notebook (see
 "Adding another model" below).
 
 Notes:
-- `notebooks/fauxtography-on-colab.ipynb`, `00_data_overview.ipynb` and
-  `final_report.ipynb` are generated from `scripts/make_notebooks.py`; edit
-  templates and re-run, don't hand-edit the JSON.
-- `analysis_clip.ipynb` and `analysis_dinov2.ipynb` are hand-maintained:
-  their content and figures live in the notebook files themselves, and the
-  generators for them are commented out in `make_notebooks.py` so that
-  regenerating never silently replaces the written-up analysis.
+- `notebooks/fauxtography-on-colab.ipynb` and `00_data_overview.ipynb` are
+  generated from `scripts/make_notebooks.py`; edit templates and re-run,
+  don't hand-edit the JSON.
+- `analysis_clip.ipynb`, `analysis_dinov2.ipynb` and `final_report.ipynb`
+  are hand-maintained: their content and figures live in the notebook files
+  themselves, and the generators for them are commented out in
+  `make_notebooks.py` so that regenerating never silently replaces the
+  written-up analysis.
 
 ---
 
