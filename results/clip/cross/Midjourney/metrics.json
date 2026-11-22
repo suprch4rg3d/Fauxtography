@@ -1,0 +1,34 @@
+{
+  "generator": "Midjourney",
+  "model": "clip",
+  "variant": "openai/clip-vit-base-patch32",
+  "accuracy": 0.7885,
+  "n_samples": 2000,
+  "classification_report": {
+    "real": {
+      "precision": 0.835075493612079,
+      "recall": 0.719,
+      "f1-score": 0.7727028479312198,
+      "support": 1000.0
+    },
+    "fake": {
+      "precision": 0.7532923617208077,
+      "recall": 0.858,
+      "f1-score": 0.8022440392706872,
+      "support": 1000.0
+    },
+    "accuracy": 0.7885,
+    "macro avg": {
+      "precision": 0.7941839276664433,
+      "recall": 0.7885,
+      "f1-score": 0.7874734436009535,
+      "support": 2000.0
+    },
+    "weighted avg": {
+      "precision": 0.7941839276664433,
+      "recall": 0.7885,
+      "f1-score": 0.7874734436009535,
+      "support": 2000.0
+    }
+  }
+}

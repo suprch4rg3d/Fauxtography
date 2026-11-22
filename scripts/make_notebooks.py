@@ -672,16 +672,17 @@ print("manual step - see cells above")
 
 def main() -> None:
     write("00_data_overview.ipynb", data_overview())
-    # analysis_clip / analysis_dinov2 are now hand-maintained notebooks (their
-    # content and figures live inside the .ipynb, not in this generator).
-    # Regenerating would silently replace the populated notebooks with empty
-    # templates - so the generators are disabled until/unless we decide
-    # otherwise. Re-enable by removing the leading '#' on the two lines below.
+    # analysis_clip / analysis_dinov2 / final_report are now hand-maintained
+    # notebooks (their content and figures live inside the .ipynb, not in this
+    # generator). Regenerating would silently replace the populated notebooks
+    # with empty templates - so the generators are disabled until/unless we
+    # decide otherwise. Re-enable by removing the leading '#' on the lines
+    # below.
     # write("analysis_clip.ipynb", model_analysis("clip", "CLIP zero-shot", "DemetraP20"))
     # write(
     #     "analysis_dinov2.ipynb", model_analysis("dinov2", "DINOv2 + linear probe", "suprch4rg3d")
     # )
-    write("final_report.ipynb", final_report())
+    # write("final_report.ipynb", final_report())
     write("fauxtography-on-colab.ipynb", fauxtography_on_colab())
 
 
